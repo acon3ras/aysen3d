@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Slop Puerto Aysén — Patagonia 3D (v0.1 MVP)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌉</text></svg>" />
+  <meta name="description" content="Simulación 3D interactiva de Puerto Aysén, Patagonia Chilena, construida con Three.js a partir de datos reales de OpenStreetMap, relieve andino y el Puente Presidente Ibáñez." />
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Estilos UI -->
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- Importmap para Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Contenedor del lienzo 3D -->
+  <div id="canvas-container"></div>
+
+  <!-- Retículo / Mira central -->
+  <div id="crosshair"></div>
+
+  <!-- Pantalla de carga inicial -->
+  <div id="loader-overlay">
+    <div class="loader-spinner"></div>
+    <div class="loader-title">Slop Puerto Aysén 3D</div>
+    <div class="loader-msg">Cargando 817 calles, 2.800 casas patagónicas y el Río Aysén...</div>
+  </div>
+
+  <!-- HUD Superior Izquierdo: Información y Estado -->
+  <div id="top-left-panel" class="hud-panel">
+    <div class="title-container">
+      <span class="bridge-badge">Patagonia 3D</span>
+      <h1>Puerto Aysén</h1>
+    </div>
+    <div class="subtitle">
+      <span>📍 45°24′ S, 72°41′ O</span>
+      <span>•</span>
+      <span id="mode-indicator">Drone / Vuelo</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><span id="fps-display">60 FPS</span></div>
+      <div class="stat-item"><span id="coords-display">X: 0 m | Z: 0 m</span></div>
+    </div>
+  </div>
+
+  <!-- HUD Superior Derecho: Atmósfera y Clima Patagónico -->
+  <div id="top-right-panel" class="hud-panel">
+    <span class="section-label">Atmósfera y Clima</span>
+    <div class="button-group">
+      <button class="weather-btn active" data-weather="sol">☀️ Sol</button>
+      <button class="weather-btn" data-weather="niebla">🌫️ Niebla</button>
+      <button class="weather-btn" data-weather="lluvia">🌧️ Lluvia</button>
+      <button class="weather-btn" data-weather="dorado">🌅 Atardecer</button>
+      <button class="weather-btn" data-weather="noche">🌙 Noche</button>
+      <button id="audio-toggle-btn" class="weather-btn">🔇 Audio</button>
+    </div>
+  </div>
+
+  <!-- HUD Inferior Izquierdo: Teletransporte a Hitos -->
+  <div id="teleport-panel" class="hud-panel">
+    <span class="section-label">Hitos de Puerto Aysén</span>
+    <div class="teleport-list">
+      <button class="teleport-btn" data-spawn="puente">🌉 Puente Ibáñez</button>
+      <button class="teleport-btn" data-spawn="plaza">🏛️ Plaza de Armas</button>
+      <button class="teleport-btn" data-spawn="comisaria">🏛️ 2ª Comisaría (1932)</button>
+      <button class="teleport-btn" data-spawn="costanera">🌊 Costanera Río Aysén</button>
+      <button class="teleport-btn" data-spawn="ribera_norte">🌲 Ribera Norte</button>
+    </div>
+  </div>
+
+  <!-- HUD Inferior Central: Controles -->
+  <div id="controls-hint" class="hud-panel">
+    <div><span class="key-tag">Clic</span> Mirar (Ratón)</div>
+    <div><span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> Mover</div>
+    <div><span class="key-tag">Shift</span> Acelerar</div>
+    <div><span class="key-tag">Espacio</span>/<span class="key-tag">C</span> Subir/Bajar</div>
+    <div><span class="key-tag">V</span> Cambiar Modo</div>
+  </div>
+
+  <!-- HUD Inferior Derecho: Minimapa -->
+  <div id="minimap-panel" class="hud-panel">
+    <span class="compass-label">Norte ↑</span>
+    <canvas id="minimap-canvas"></canvas>
+  </div>
+
+  <!-- Script Principal de la Aplicación -->
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

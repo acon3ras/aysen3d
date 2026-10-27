@@ -1,0 +1,23 @@
+{
+  "name": "slop-puerto-aysen",
+  "version": "0.2.0",
+  "description": "Simulación 3D interactiva de Puerto Aysén, Patagonia Chilena, desarrollada con Three.js a partir de datos reales de OpenStreetMap y el Puente Presidente Ibáñez.",
+  "type": "module",
+  "scripts": {
+    "start": "node -e \"console.log('Abrir en http://localhost/Aysen3d/ o desplegar a Vercel')\"",
+    "osm:fetch": "node tools/fetch_aysen_osm.mjs",
+    "osm:build": "node tools/build_aysen_geodata.mjs"
+  },
+  "keywords": [
+    "threejs",
+    "puerto-aysen",
+    "patagonia",
+    "chile",
+    "3d-city",
+    "slop-cities",
+    "openstreetmap",
+    "puente-ibanez"
+  ],
+  "author": "Slop Puerto Aysén Contributors",
+  "license": "MIT"
+}
