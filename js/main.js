@@ -207,7 +207,7 @@ const SPAWN_PRESETS = {
   puente: { pos: [0, 7.8, 35], lookAt: [0, 8.0, 100], yaw: Math.PI, label: 'Puente Presidente Ibáñez' },
   plaza: { pos: [-1107, 0.4, 236], lookAt: [-1107, 1.5, 219], yaw: 0, label: 'Plaza de Armas' },
   muni: { pos: [-1113.7, 0.4, 216], lookAt: [-1113.7, 4.5, 187.1], yaw: 0, label: 'Ilustre Municipalidad' },
-  hospital: { pos: [15.0, 0.4, 480], lookAt: [15.0, 5.0, 444.5], yaw: 0, label: 'Hospital Dr. Jorge Ibar' },
+  hospital: { pos: [15.0, 0.4, 355], lookAt: [15.0, 5.5, 420], yaw: 0, label: 'Hospital Dr. Jorge Ibar' },
   comisaria: { pos: [-1005, 0.4, 172], lookAt: [-1005.4, 4.5, 149.4], yaw: 0, label: '2ª Comisaría (Tierras y Colonización)' },
   costanera: { pos: [-480, 0.4, 122], lookAt: [-480, 2.0, 50], yaw: -Math.PI / 2, label: 'Costanera Río Aysén' },
   ribera_norte: { pos: [30, 0.4, -170], lookAt: [0, 7.5, 0], yaw: 0, label: 'Ribera Norte' }

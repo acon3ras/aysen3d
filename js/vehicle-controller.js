@@ -231,6 +231,17 @@ export function createVehicleController(scene, camera) {
       yaw = targetYaw;
       speed = 0;
       vehicleGroup.rotation.y = yaw;
+
+      // Reubicar cámara de persecución inmediatamente sin arrastre lejano
+      const forwardX = Math.sin(yaw);
+      const forwardZ = Math.cos(yaw);
+      currentCamPos.set(
+        x - forwardX * 7.2,
+        vehicleGroup.position.y + 2.8,
+        z - forwardZ * 7.2
+      );
+      camera.position.copy(currentCamPos);
+      camera.lookAt(x + forwardX * 3.5, vehicleGroup.position.y + 1.2, z + forwardZ * 3.5);
     },
     getSpeedKmh: () => Math.round(Math.abs(speed) * 3.6),
     getSpeedFraction: () => Math.min(1.0, Math.abs(speed) / maxSpeed),
