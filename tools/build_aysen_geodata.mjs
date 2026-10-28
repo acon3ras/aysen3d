@@ -170,7 +170,7 @@ const landmarks = [
   { name: 'Plaza de Armas Puerto Aysén', c: [-1107, 219], desc: 'Centro cívico de Ribera Sur' },
   { name: 'Polideportivo 21 de Abril', c: [-1350, 480], desc: 'Complejo deportivo principal' },
   { name: 'Ilustre Municipalidad de Aysén', c: [-1050, 180], desc: 'Edificio consistorial' },
-  { name: 'Hospital Dr. Jorge Ibar', c: [-1450, 380], desc: 'Hospital de Puerto Aysén' },
+  { name: 'Hospital de Puerto Aysén', c: [15, 430], desc: 'Hospital de Puerto Aysén' },
   { name: 'Ribera Norte (Acceso Coyhaique)', c: [50, -220], desc: 'Ruta 240 hacia Coyhaique' },
   { name: 'Confluencia Río Los Palos', c: [-450, -900], desc: 'Unión de ríos patagónicos' }
 ];

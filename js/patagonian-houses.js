@@ -64,8 +64,8 @@ export function createPatagonianBuildings(geoData) {
   const EXCLUDED_LANDMARK_IDS = new Set([
     836943359, // Oficina de Tierras y Colonización (2ª Comisaría)
     434686872, // Ilustre Municipalidad de Aysén
-    625135601, // Hospital Dr. Jorge Ibar de Puerto Aysén (Edificio Principal)
-    364383065  // Hospital Dr. Jorge Ibar (Ala de Urgencias / Servicios)
+    625135601, // Hospital de Puerto Aysén (Edificio Principal)
+    364383065  // Hospital de Puerto Aysén (Ala de Urgencias / Servicios)
   ]);
 
   buildings.forEach((b) => {

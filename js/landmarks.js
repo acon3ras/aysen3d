@@ -109,7 +109,7 @@ export function createLandmarks(geoData) {
   });
 
   // ---------------------------------------------------------------------------
-  // GENERADORES PROCEDURALES DE TEXTURAS PARA EL HOSPITAL DR. JORGE IBAR
+  // GENERADORES PROCEDURALES DE TEXTURAS PARA EL HOSPITAL DE PUERTO AYSÉN
   // Basados 1:1 en las fotos reales y bosquejo arquitectónico:
   // - Listones de madera horizontales con bandas cálidas multicolores (trespa/alerce)
   // - Letrero oficial en burdeo: "HOSPITAL DE PUERTO AYSÉN"
@@ -573,7 +573,7 @@ export function createLandmarks(geoData) {
   }
 
   // ---------------------------------------------------------------------------
-  // 3. HOSPITAL DR. JORGE IBAR DE PUERTO AYSÉN
+  // 3. HOSPITAL DE PUERTO AYSÉN
   // Ubicación OSM Oficial: Camino a Chacabuco / Av. Eusebio Ibar (X: 15.0m, Z: 430.0m)
   // Recreación 1:1 basada en las fotos reales y bosquejo arquitectónico del usuario:
   // - Zócalo de hormigón verde oliva / salvia patagónico (Piso 1)
@@ -633,7 +633,7 @@ export function createLandmarks(geoData) {
 
   function buildHospital() {
     const building = new THREE.Group();
-    building.name = 'HospitalDrJorgeIbar';
+    building.name = 'HospitalDePuertoAysen';
     building.position.set(15.0, 0.2, 430.0);
     building.rotation.y = 0.0; // Fachada mira al Norte (-Z) hacia el acceso
 
