@@ -175,17 +175,17 @@ export function createLandmarks(geoData) {
 
     ctx.clearRect(0, 0, 1024, 128);
 
-    ctx.font = 'bold 50px "Outfit", "Inter", sans-serif';
+    ctx.font = 'bold 52px "Outfit", "Inter", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // Sombra suave para relieve
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillText('HOSPITAL DE PUERTO AYSÉN', 514, 66);
+    // Sombra de relieve metálico (letras individuales montadas en fachada)
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillText('HOSPITAL DE PUERTO AYSEN', 515, 68);
 
-    // Tipografía institucional burdeo/carmín
-    ctx.fillStyle = '#881337';
-    ctx.fillText('HOSPITAL DE PUERTO AYSÉN', 512, 64);
+    // Letras en acero inoxidable / aluminio plateado brillante (fieles a la foto real del frontis)
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillText('HOSPITAL DE PUERTO AYSEN', 512, 64);
 
     return new THREE.CanvasTexture(canvas);
   }
@@ -212,11 +212,152 @@ export function createLandmarks(geoData) {
     return new THREE.CanvasTexture(canvas);
   }
 
+  // Texturas de señalética interior (Planos DWG: SOME, Triage, Sala de Espera)
+  function createAdmisionSignTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0284c7'; // Azul institucional de salud
+    ctx.fillRect(0, 0, 512, 128);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(6, 6, 500, 116);
+    ctx.font = 'bold 36px "Outfit", "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('ADMISIÓN · SOME · OIRS', 256, 64);
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createQueueScreenTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, 512, 256);
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('HOSPITAL DE PUERTO AYSÉN', 256, 42);
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '22px "Inter", sans-serif';
+    ctx.fillText('SALA DE ESPERA · ATENCIÓN', 256, 78);
+    ctx.fillStyle = '#facc15';
+    ctx.font = '900 68px "Outfit", monospace';
+    ctx.fillText('A - 0 4 2', 256, 160);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = '22px "Inter", sans-serif';
+    ctx.fillText('MÓDULO 3 · BOX 1', 256, 218);
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createDoorPlateTexture(label) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, 256, 64);
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, 252, 60);
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 19px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, 128, 32);
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createCultureTruckTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 512, 256);
+    // Encabezado institucional oficial
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = 'bold 15px "Inter", sans-serif';
+    ctx.fillText('Ministerio de las Culturas, las Artes y el Patrimonio', 30, 36);
+    ctx.fillStyle = '#0284c7';
+    ctx.font = 'bold 24px "Outfit", sans-serif';
+    ctx.fillText('Región de Aysén', 30, 70);
+    // Mosaico geométrico colorido inferior (como foto real VH-SJ-31)
+    const blockW = 28;
+    const blockH = 22;
+    const colors = ['#dc2626', '#2563eb', '#facc15', '#0284c7', '#ea580c', '#ffffff', '#1e293b'];
+    for (let y = 105; y < 246; y += blockH + 3) {
+      for (let x = 20; x < 490; x += blockW + 3) {
+        const c = colors[Math.abs(Math.sin(x * 13.7 + y * 9.1) * 100) % colors.length | 0];
+        ctx.fillStyle = c;
+        ctx.fillRect(x, y, blockW, blockH);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x, y, blockW, blockH);
+      }
+    }
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createPlateTexture(plateText) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 48;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 128, 48);
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 124, 44);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '900 24px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(plateText, 64, 24);
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createTactilePaveTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillStyle = '#ca8a04';
+    for (let x = 4; x < 64; x += 16) {
+      ctx.fillRect(x, 0, 6, 64);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 16);
+    return tex;
+  }
+
   const hospitalTimberTexture = createHospitalTimberTexture();
   const hospitalSignTexture = createHospitalSignTexture();
   const urgenciasSignTexture = createUrgenciasSignTexture();
+  const admisionSignTexture = createAdmisionSignTexture();
+  const queueScreenTexture = createQueueScreenTexture();
+  const cultureTruckTexture = createCultureTruckTexture();
+  const truckPlateTexture = createPlateTexture('VH·SJ·31');
+  const tactilePaveTexture = createTactilePaveTexture();
 
-  // Materiales característicos del Hospital
+  // Placas de puertas clínicas (según planos DWG)
+  const doorPlateTriageTex = createDoorPlateTexture('TRIAGE / EVALUACIÓN');
+  const doorPlateGinecoTex = createDoorPlateTexture('BOX GINECOLÓGICO');
+  const doorPlateReaniTex = createDoorPlateTexture('BOX REANIMACIÓN');
+  const doorPlateFarmaTex = createDoorPlateTexture('FARMACIA Y RECETAS');
+  const doorPlateArchivoTex = createDoorPlateTexture('ARCHIVO CLÍNICO');
+  const doorPlateWcTex = createDoorPlateTexture('BAÑOS PÚBLICOS');
+  const doorPlateElevTex = createDoorPlateTexture('ASCENSORES MONTACAMA');
+
+  // Materiales exteriores e interiores característicos del Hospital
   const hospitalBaseMat = new THREE.MeshStandardMaterial({
     color: 0x556345, // Verde oliva / salvia patagónico del 1er piso
     roughness: 0.82,
@@ -264,6 +405,75 @@ export function createLandmarks(geoData) {
     emissive: 0xef4444,
     emissiveIntensity: 2.2
   });
+
+  // Materiales interiores (según planos DWG)
+  const interiorFloorMat = new THREE.MeshStandardMaterial({
+    color: 0xf8f4ec, // Pavimento vinílico sanitario hospitalario beige claro
+    roughness: 0.3,
+    metalness: 0.05,
+    emissive: 0x64748b,
+    emissiveIntensity: 0.22,
+    side: THREE.DoubleSide
+  });
+
+  const interiorWallMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, // Paredes blancas lavables
+    roughness: 0.45,
+    metalness: 0.02,
+    emissive: 0x94a3b8,
+    emissiveIntensity: 0.3,
+    side: THREE.DoubleSide
+  });
+
+  const bumperMat = new THREE.MeshStandardMaterial({
+    color: 0x334155, // Zócalo guardacamillas gris
+    roughness: 0.5
+  });
+
+  const deskWoodMat = new THREE.MeshStandardMaterial({
+    color: 0xb45309, // Mesón de atención en madera cálida
+    roughness: 0.5
+  });
+
+  const chairBlueMat = new THREE.MeshStandardMaterial({
+    color: 0x0284c7, // Sillas azul institucional
+    roughness: 0.55
+  });
+
+  const stainlessDoorMat = new THREE.MeshStandardMaterial({
+    color: 0xd4d4d8, // Acero inoxidable cepillado (ascensores y barandas)
+    metalness: 0.9,
+    roughness: 0.2
+  });
+
+  const ceilingTileMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.35,
+    emissive: 0xdbeafe,
+    emissiveIntensity: 0.65,
+    side: THREE.DoubleSide
+  });
+
+  const ledPanelMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0xffffff,
+    emissiveIntensity: 4.5 // Iluminación interior en cielo falso
+  });
+
+  const tactileYellowMat = new THREE.MeshStandardMaterial({
+    map: tactilePaveTexture,
+    roughness: 0.45
+  });
+
+  const doorPlateTriageMat = new THREE.MeshBasicMaterial({ map: doorPlateTriageTex, side: THREE.DoubleSide });
+  const doorPlateGinecoMat = new THREE.MeshBasicMaterial({ map: doorPlateGinecoTex, side: THREE.DoubleSide });
+  const doorPlateReaniMat = new THREE.MeshBasicMaterial({ map: doorPlateReaniTex, side: THREE.DoubleSide });
+  const doorPlateFarmaMat = new THREE.MeshBasicMaterial({ map: doorPlateFarmaTex, side: THREE.DoubleSide });
+  const doorPlateArchivoMat = new THREE.MeshBasicMaterial({ map: doorPlateArchivoTex, side: THREE.DoubleSide });
+  const doorPlateWcMat = new THREE.MeshBasicMaterial({ map: doorPlateWcTex, side: THREE.DoubleSide });
+  const doorPlateElevMat = new THREE.MeshBasicMaterial({ map: doorPlateElevTex, side: THREE.DoubleSide });
+  const cultureTruckMat = new THREE.MeshStandardMaterial({ map: cultureTruckTexture, roughness: 0.3 });
+  const truckPlateMat = new THREE.MeshBasicMaterial({ map: truckPlateTexture });
 
   // ---------------------------------------------------------------------------
   // 1. OFICINA DE TIERRAS Y COLONIZACIÓN (1932)
@@ -631,6 +841,284 @@ export function createLandmarks(geoData) {
     return car;
   }
 
+  // ---------------------------------------------------------------------------
+  // MODELADO DE ELEMENTOS HOSPITALARIOS INTERIORES Y EXTERIORES
+  // ---------------------------------------------------------------------------
+  function buildBicycle(color) {
+    const bike = new THREE.Group();
+    const frameMat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.6 });
+    const rubberMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const spokeMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.3 });
+
+    // Ruedas delantera y trasera con llanta y neumático
+    [-0.55, 0.55].forEach(wx => {
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.03, 8, 16), rubberMat);
+      tire.position.set(wx, 0.3, 0);
+      bike.add(tire);
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.06, 8), spokeMat);
+      hub.rotation.x = Math.PI / 2;
+      hub.position.set(wx, 0.3, 0);
+      bike.add(hub);
+    });
+
+    // Cuadro tubular de bicicleta
+    const topTube = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.75, 6), frameMat);
+    topTube.rotation.z = Math.PI / 2;
+    topTube.position.set(0, 0.65, 0);
+    bike.add(topTube);
+
+    const downTube = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.8, 6), frameMat);
+    downTube.rotation.z = 0.82;
+    downTube.position.set(-0.12, 0.48, 0);
+    bike.add(downTube);
+
+    const seatTube = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.6, 6), frameMat);
+    seatTube.rotation.z = -0.3;
+    seatTube.position.set(-0.22, 0.52, 0);
+    bike.add(seatTube);
+
+    // Asiento
+    const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.1), rubberMat);
+    saddle.position.set(-0.28, 0.74, 0);
+    bike.add(saddle);
+
+    // Horquilla y manubrio
+    const fork = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.5, 6), spokeMat);
+    fork.rotation.z = 0.25;
+    fork.position.set(0.48, 0.52, 0);
+    bike.add(fork);
+
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.5), frameMat);
+    bar.position.set(0.45, 0.76, 0);
+    bike.add(bar);
+
+    return bike;
+  }
+
+  function buildCultureTruck() {
+    const truck = new THREE.Group();
+    const whiteCabMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+    const bumperDarkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85, roughness: 0.2 });
+    const glassDarkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.1 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+
+    // Cabina blanca del camión (Isuzu / Mitsubishi Canter de la foto)
+    const cabMesh = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.85, 1.7), whiteCabMat);
+    cabMesh.position.set(0, 1.35, -1.8);
+    cabMesh.castShadow = true;
+    truck.add(cabMesh);
+
+    // Parabrisas
+    const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.8, 0.08), glassDarkMat);
+    windshield.position.set(0, 1.6, -2.66);
+    truck.add(windshield);
+
+    // Ventanas laterales de cabina
+    [-1.06, 1.06].forEach(wx => {
+      const sideWin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.65, 0.9), glassDarkMat);
+      sideWin.position.set(wx, 1.6, -1.8);
+      truck.add(sideWin);
+    });
+
+    // Deflector aerodinámico sobre el techo de la cabina
+    const deflectorGeo = new THREE.BoxGeometry(1.9, 0.65, 1.4);
+    const deflector = new THREE.Mesh(deflectorGeo, whiteCabMat);
+    deflector.position.set(0, 2.45, -1.7);
+    deflector.rotation.x = -0.22;
+    truck.add(deflector);
+
+    // Paragolpes delantero con patente VH-SJ-31
+    const bumper = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.35, 0.3), bumperDarkMat);
+    bumper.position.set(0, 0.55, -2.7);
+    truck.add(bumper);
+
+    const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.2), truckPlateMat);
+    plate.position.set(0, 0.55, -2.86);
+    truck.add(plate);
+
+    // Focos delanteros
+    [-0.8, 0.8].forEach(hx => {
+      const headL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 0.06), chromeMat);
+      headL.position.set(hx, 0.68, -2.72);
+      truck.add(headL);
+    });
+
+    // Furgón / Carrocería de carga con gráficos culturales oficiales
+    const boxGeo = new THREE.BoxGeometry(2.28, 2.35, 4.4);
+    const boxMesh = new THREE.Mesh(boxGeo, cultureTruckMat);
+    boxMesh.position.set(0, 1.7, 1.25);
+    boxMesh.castShadow = true;
+    truck.add(boxMesh);
+
+    // Ruedas (Eje delantero y dual trasero)
+    [
+      [-0.95, 0.42, -1.8], [0.95, 0.42, -1.8],
+      [-0.98, 0.42, 2.2], [0.98, 0.42, 2.2]
+    ].forEach(([wx, wy, wz]) => {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.28, 12), wheelMat);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(wx, wy, wz);
+      w.castShadow = true;
+      truck.add(w);
+    });
+
+    return truck;
+  }
+
+  function buildGurney() {
+    const gurney = new THREE.Group();
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.2 });
+    const blueVinylMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const whitePillowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+
+    // Chasis metálico inferior
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.1, 0.8), chromeMat);
+    frame.position.y = 0.5;
+    gurney.add(frame);
+
+    // 4 Ruedas giratorias
+    [[-0.9, 0.12, -0.32], [0.9, 0.12, -0.32], [-0.9, 0.12, 0.32], [0.9, 0.12, 0.32]].forEach(([wx, wy, wz]) => {
+      const caster = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), wheelMat);
+      caster.rotation.x = Math.PI / 2;
+      caster.position.set(wx, wy, wz);
+      gurney.add(caster);
+    });
+
+    // Columnas hidráulicas
+    [-0.5, 0.5].forEach(cx => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 6), chromeMat);
+      col.position.set(cx, 0.28, 0);
+      gurney.add(col);
+    });
+
+    // Colchón clínico azul
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.15, 0.76), blueVinylMat);
+    pad.position.y = 0.62;
+    gurney.add(pad);
+
+    // Almohada blanca
+    const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.6), whitePillowMat);
+    pillow.position.set(-0.72, 0.72, 0);
+    gurney.add(pillow);
+
+    // Barandas laterales de protección
+    [-0.4, 0.4].forEach(bz => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.22, 0.03), chromeMat);
+      rail.position.set(0.1, 0.78, bz);
+      gurney.add(rail);
+    });
+
+    // Atril portasuero (IV Pole) con matraz de suero salino
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.4, 6), chromeMat);
+    pole.position.set(-0.95, 1.15, 0.36);
+    gurney.add(pole);
+
+    const hook = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.02, 0.02), chromeMat);
+    hook.position.set(-0.95, 1.82, 0.36);
+    gurney.add(hook);
+
+    // Bolsa de suero
+    const dripBag = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.04), new THREE.MeshStandardMaterial({
+      color: 0xbae6fd, transparent: true, opacity: 0.75, roughness: 0.1
+    }));
+    dripBag.position.set(-0.9, 1.7, 0.36);
+    gurney.add(dripBag);
+
+    return gurney;
+  }
+
+  function buildWheelchair() {
+    const chair = new THREE.Group();
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.2 });
+    const blackMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+
+    // Ruedas grandes traseras con aros de propulsión
+    [-0.32, 0.32].forEach(wz => {
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.025, 8, 16), blackMat);
+      tire.rotation.y = Math.PI / 2;
+      tire.position.set(-0.1, 0.34, wz);
+      chair.add(tire);
+    });
+
+    // Rueditas delanteras
+    [-0.26, 0.26].forEach(wz => {
+      const frontCaster = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.04, 8), blackMat);
+      frontCaster.rotation.x = Math.PI / 2;
+      frontCaster.position.set(0.3, 0.08, wz);
+      chair.add(frontCaster);
+    });
+
+    // Chasis y asiento
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.04, 0.44), blackMat);
+    seat.position.set(0.08, 0.42, 0);
+    chair.add(seat);
+
+    const back = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.44, 0.44), blackMat);
+    back.position.set(-0.14, 0.66, 0);
+    chair.add(back);
+
+    // Apoyabrazos
+    [-0.23, 0.23].forEach(az => {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.04, 0.05), blackMat);
+      arm.position.set(0.08, 0.6, az);
+      chair.add(arm);
+    });
+
+    // Manillas de empuje traseras
+    [-0.18, 0.18].forEach(hz => {
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.12, 6), blackMat);
+      handle.rotation.x = Math.PI / 2;
+      handle.position.set(-0.2, 0.86, hz);
+      chair.add(handle);
+    });
+
+    return chair;
+  }
+
+  function buildWaitingBench(seatsCount = 4) {
+    const bench = new THREE.Group();
+    const beamMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+    const seatMat = chairBlueMat;
+
+    const totalLen = seatsCount * 0.65;
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(totalLen, 0.06, 0.06), beamMat);
+    beam.position.y = 0.38;
+    bench.add(beam);
+
+    // Patas metálicas en arco
+    [-totalLen / 2 + 0.3, totalLen / 2 - 0.3].forEach(lx => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.38, 8), beamMat);
+      leg.position.set(lx, 0.19, 0);
+      bench.add(leg);
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.4), beamMat);
+      foot.position.set(lx, 0.02, 0);
+      bench.add(foot);
+    });
+
+    // Asientos individuales plásticos anatómicos
+    for (let i = 0; i < seatsCount; i++) {
+      const sx = -totalLen / 2 + 0.32 + i * 0.65;
+      const seatBottom = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.04, 0.44), seatMat);
+      seatBottom.position.set(sx, 0.42, 0.05);
+      bench.add(seatBottom);
+
+      const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.42, 0.04), seatMat);
+      seatBack.position.set(sx, 0.64, -0.16);
+      seatBack.rotation.x = -0.12;
+      bench.add(seatBack);
+    }
+
+    return bench;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 3. HOSPITAL DE PUERTO AYSÉN
+  // Ubicación OSM Oficial: Camino a Chacabuco / Av. Eusebio Ibar (X: 15.0m, Z: 430.0m)
+  // Interior completamente recorrible (Planta Baja según Planos DWG oficiales)
+  // Exterior fiel a la foto real (Camión cultural VH-SJ-31, bicicletero, rampa)
+  // ---------------------------------------------------------------------------
   function buildHospital() {
     const building = new THREE.Group();
     building.name = 'HospitalDePuertoAysen';
@@ -644,18 +1132,21 @@ export function createLandmarks(geoData) {
     const totalH = groundH + upperH; // 11.0m
     const frontZ = -mainD / 2; // -11.0m
 
-    // 1. Zócalo / Primer Piso en verde oliva patagónico
-    const groundGeo = new THREE.BoxGeometry(mainW, groundH, mainD);
-    const groundMesh = new THREE.Mesh(groundGeo, hospitalBaseMat);
-    groundMesh.position.y = groundH / 2;
-    groundMesh.castShadow = true;
-    groundMesh.receiveShadow = true;
-    building.add(groundMesh);
+    // =========================================================================
+    // ESTRUCTURA EXTERIOR: PISOS SUPERIORES (2 Y 3) Y AZOTEA
+    // =========================================================================
+    // Pisos Superiores (2 y 3) en listones de madera cálida
+    const upperGeo = new THREE.BoxGeometry(mainW, upperH, mainD);
+    const upperMesh = new THREE.Mesh(upperGeo, hospitalWoodMat);
+    upperMesh.position.y = groundH + upperH / 2;
+    upperMesh.castShadow = true;
+    upperMesh.receiveShadow = true;
+    building.add(upperMesh);
 
-    // Zócalo de cimiento / hormigón visto en la base
-    const plinthGeo = new THREE.BoxGeometry(mainW + 0.4, 0.4, mainD + 0.4);
+    // Zócalo de cimiento perimetral exterior
+    const plinthGeo = new THREE.BoxGeometry(mainW + 0.4, 0.35, mainD + 0.4);
     const plinthMesh = new THREE.Mesh(plinthGeo, stonePlinthMat);
-    plinthMesh.position.y = 0.2;
+    plinthMesh.position.y = 0.17;
     building.add(plinthMesh);
 
     // Moldura divisoria perimetral blanca entre piso 1 y 2
@@ -663,14 +1154,6 @@ export function createLandmarks(geoData) {
     const moldMesh = new THREE.Mesh(moldGeo, hospitalWhiteTrimMat);
     moldMesh.position.y = groundH;
     building.add(moldMesh);
-
-    // 2. Pisos Superiores (2 y 3) en listones de madera cálida
-    const upperGeo = new THREE.BoxGeometry(mainW, upperH, mainD);
-    const upperMesh = new THREE.Mesh(upperGeo, hospitalWoodMat);
-    upperMesh.position.y = groundH + upperH / 2;
-    upperMesh.castShadow = true;
-    upperMesh.receiveShadow = true;
-    building.add(upperMesh);
 
     // Franja divisoria horizontal entre pisos 2 y 3
     const midBandGeo = new THREE.BoxGeometry(mainW + 0.1, 0.15, mainD + 0.1);
@@ -684,7 +1167,7 @@ export function createLandmarks(geoData) {
     parapet.position.y = totalH + 0.3;
     building.add(parapet);
 
-    // Caja de máquinas / Penthouse en Azotea (visto en Foto 2)
+    // Caja de máquinas / Penthouse en Azotea
     const phW = 20, phH = 3.2, phD = 14;
     const phGeo = new THREE.BoxGeometry(phW, phH, phD);
     const phMesh = new THREE.Mesh(phGeo, hospitalWoodMat);
@@ -707,19 +1190,352 @@ export function createLandmarks(geoData) {
       rung.position.set(ladderX, ly, ladderZ);
       building.add(rung);
     }
-    // Rieles verticales y aros de seguridad
     [-0.3, 0.3].forEach(offZ => {
       const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, totalH, 6), canopyArchMat);
       rail.position.set(ladderX, totalH / 2, ladderZ + offZ);
       building.add(rail);
     });
 
-    // 3. Marquesina Curva Abovedada de Acceso (Canopy de Fotos 1 y 3)
+    // =========================================================================
+    // PRIMER PISO INTERIOR HUECO Y RECORRIBLE (PLANOS OFICIALES DWG)
+    // =========================================================================
+    // 1. Pavimento vinílico sanitario interior continuo
+    const floorGeo = new THREE.PlaneGeometry(mainW, mainD);
+    floorGeo.rotateX(-Math.PI / 2);
+    const floorMesh = new THREE.Mesh(floorGeo, interiorFloorMat);
+    floorMesh.position.y = 0.02;
+    floorMesh.receiveShadow = true;
+    building.add(floorMesh);
+
+    // 2. Cielo falso continuo en Piso 1
+    const ceilGeo = new THREE.PlaneGeometry(mainW, mainD);
+    ceilGeo.rotateX(Math.PI / 2);
+    const ceilMesh = new THREE.Mesh(ceilGeo, ceilingTileMat);
+    ceilMesh.position.y = groundH - 0.02;
+    building.add(ceilMesh);
+
+    // Paneles LED empotrados en cielo falso (Iluminación hospitalaria continua)
+    [
+      [-10, -5], [-4, -5], [4, -5], [10, -5],
+      [-20, 1.3], [-10, 1.3], [0, 1.3], [10, 1.3], [20, 1.3],
+      [-10, 6.5], [0, 6.5], [10, 6.5]
+    ].forEach(([lx, lz]) => {
+      const ledGeo = new THREE.BoxGeometry(1.6, 0.04, 0.6);
+      const ledMesh = new THREE.Mesh(ledGeo, ledPanelMat);
+      ledMesh.position.set(lx, groundH - 0.04, lz);
+      building.add(ledMesh);
+    });
+
+    // Iluminación interior clínica (LEDs empotrados y luces de relleno cálidas)
+    const light1 = new THREE.PointLight(0xfff7ed, 3.2, 28);
+    light1.position.set(0, 3.2, -4);
+    building.add(light1);
+
+    const light2 = new THREE.PointLight(0xfff7ed, 2.8, 28);
+    light2.position.set(-14, 3.2, 1.5);
+    building.add(light2);
+
+    const light3 = new THREE.PointLight(0xfff7ed, 2.8, 28);
+    light3.position.set(14, 3.2, 1.5);
+    building.add(light3);
+
+    const lightFill = new THREE.PointLight(0xf8fafc, 2.4, 35);
+    lightFill.position.set(0, 2.4, 0);
+    building.add(lightFill);
+
+    // 3. Muros Perimetrales del Piso 1 (Huecos con vano frontal de acceso)
+    const wallThick = 0.4;
+    // Muro frontal izquierdo
+    const frontWallL = new THREE.Mesh(new THREE.BoxGeometry(mainW / 2 - 6, groundH, wallThick), hospitalBaseMat);
+    frontWallL.position.set(-mainW / 4 - 3, groundH / 2, frontZ);
+    frontWallL.castShadow = true;
+    building.add(frontWallL);
+
+    // Muro frontal derecho
+    const frontWallR = new THREE.Mesh(new THREE.BoxGeometry(mainW / 2 - 6, groundH, wallThick), hospitalBaseMat);
+    frontWallR.position.set(mainW / 4 + 3, groundH / 2, frontZ);
+    frontWallR.castShadow = true;
+    building.add(frontWallR);
+
+    // Muro posterior (Sur)
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(mainW, groundH, wallThick), hospitalBaseMat);
+    backWall.position.set(0, groundH / 2, -frontZ);
+    backWall.castShadow = true;
+    building.add(backWall);
+
+    // Muro lateral Este
+    const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallThick, groundH, mainD), hospitalBaseMat);
+    eastWall.position.set(mainW / 2, groundH / 2, 0);
+    building.add(eastWall);
+
+    // Muro lateral Oeste (Conexión hacia Ala de Urgencias SAMU)
+    const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallThick, groundH, mainD), hospitalBaseMat);
+    westWall.position.set(-mainW / 2, groundH / 2, 0);
+    building.add(westWall);
+
+    // Puerta doble cortafuego hacia Urgencias SAMU en pared Oeste
+    const samuDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.6, 2.2), hospitalWhiteTrimMat);
+    samuDoorFrame.position.set(-mainW / 2 + 0.1, 1.3, 1.3);
+    building.add(samuDoorFrame);
+
+    const samuDoorSign = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.4), new THREE.MeshBasicMaterial({
+      map: createDoorPlateTexture('ACCESO SAMU / URGENCIAS')
+    }));
+    samuDoorSign.position.set(-mainW / 2 + 0.18, 2.3, 1.3);
+    samuDoorSign.rotation.y = Math.PI / 2;
+    building.add(samuDoorSign);
+
+    // =========================================================================
+    // GATERA DE ACCESO / VESTÍBULO CORTAVIENTO (PLANOS DWG)
+    // =========================================================================
+    const lobbyW = 10.0, lobbyH = 3.2, lobbyD = 3.6;
+    const lobbyZ = frontZ + lobbyD / 2; // -11 + 1.8 = -9.2m
+
+    // Mamparas vidriadas laterales
+    [-lobbyW / 2, lobbyW / 2].forEach(lx => {
+      const gSide = new THREE.Mesh(new THREE.BoxGeometry(0.08, lobbyH, lobbyD), glassMat);
+      gSide.position.set(lx, lobbyH / 2, lobbyZ);
+      building.add(gSide);
+    });
+
+    // Marco exterior de mampara
+    const gFrameOuter = new THREE.Mesh(new THREE.BoxGeometry(lobbyW, 0.15, 0.15), hospitalWhiteTrimMat);
+    gFrameOuter.position.set(0, lobbyH, frontZ);
+    building.add(gFrameOuter);
+
+    // Marco interior de mampara
+    const gFrameInner = new THREE.Mesh(new THREE.BoxGeometry(lobbyW, 0.15, 0.15), hospitalWhiteTrimMat);
+    gFrameInner.position.set(0, lobbyH, frontZ + lobbyD);
+    building.add(gFrameInner);
+
+    // Puertas correderas automáticas exteriores (abiertas al centro para paso libre)
+    [-3.2, 3.2].forEach(px => {
+      const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(2.0, lobbyH - 0.2, 0.06), glassMat);
+      doorMesh.position.set(px, lobbyH / 2, frontZ);
+      building.add(doorMesh);
+    });
+
+    // Puertas correderas automáticas interiores (abiertas al centro para paso libre)
+    [-3.2, 3.2].forEach(px => {
+      const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(2.0, lobbyH - 0.2, 0.06), glassMat);
+      doorMesh.position.set(px, lobbyH / 2, frontZ + lobbyD);
+      building.add(doorMesh);
+    });
+
+    // Franja podotáctil amarilla con relieve atravesando la gatera hacia el hall
+    const lobbyTactile = new THREE.Mesh(new THREE.PlaneGeometry(0.45, lobbyD + 4), tactileYellowMat);
+    lobbyTactile.rotateX(-Math.PI / 2);
+    lobbyTactile.position.set(0, 0.03, lobbyZ + 2);
+    building.add(lobbyTactile);
+
+    // =========================================================================
+    // HALL CENTRAL Y MESÓN DE ATENCIÓN (SOME · OIRS · ADMISIÓN)
+    // =========================================================================
+    const deskGroup = new THREE.Group();
+    deskGroup.position.set(7.5, 0, -4.5);
+
+    // Cuerpo principal del mesón en madera cálida
+    const deskFront = new THREE.Mesh(new THREE.BoxGeometry(9.0, 1.15, 0.7), deskWoodMat);
+    deskFront.position.set(0, 0.58, 0);
+    deskFront.castShadow = true;
+    deskGroup.add(deskFront);
+
+    // Cubierta de atención en blanco sanitario
+    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.08, 0.95), hospitalWhiteTrimMat);
+    deskTop.position.set(0, 1.18, 0);
+    deskGroup.add(deskTop);
+
+    // Separadores de acrílico transparente entre puestos
+    [-3.0, -1.0, 1.0, 3.0].forEach(sx => {
+      const acrylic = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.6, 0.8), glassMat);
+      acrylic.position.set(sx, 1.5, 0);
+      deskGroup.add(acrylic);
+    });
+
+    // Puestos de atención con computadores y pantallas
+    [-3.3, -1.1, 1.1, 3.3].forEach(px => {
+      // Pantalla de computador
+      const monBase = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.02, 0.18), hospitalEmergencyMat);
+      monBase.position.set(px, 1.23, 0.1);
+      const monScreen = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.34, 0.04), hospitalEmergencyMat);
+      monScreen.position.set(px, 1.42, 0.1);
+      const screenFace = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.3), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      screenFace.position.set(px, 1.42, 0.13);
+      deskGroup.add(monBase, monScreen, screenFace);
+
+      // Silla de operador clínico
+      const chairBase = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.04, 8), hospitalEmergencyMat);
+      chairBase.position.set(px, 0.02, -0.7);
+      const chairStem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.45, 6), stainlessDoorMat);
+      chairStem.position.set(px, 0.25, -0.7);
+      const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.45), chairBlueMat);
+      chairSeat.position.set(px, 0.5, -0.7);
+      const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.06), chairBlueMat);
+      chairBack.position.set(px, 0.78, -0.9);
+      deskGroup.add(chairBase, chairStem, chairSeat, chairBack);
+    });
+
+    // Letrero aéreo institucional: ADMISIÓN · SOME · OIRS
+    const admisionSignMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 1.2), new THREE.MeshBasicMaterial({
+      map: admisionSignTexture,
+      side: THREE.DoubleSide
+    }));
+    admisionSignMesh.position.set(0, 2.6, 0.5);
+    deskGroup.add(admisionSignMesh);
+
+    building.add(deskGroup);
+
+    // =========================================================================
+    // SALA DE ESPERA DE PACIENTES (PLANOS DWG)
+    // =========================================================================
+    const waitGroup = new THREE.Group();
+    waitGroup.position.set(-8.5, 0, -4.5);
+
+    // 4 Filas de bancadas de espera tándem (azul institucional)
+    [-1.6, -0.2, 1.2].forEach((bz, idx) => {
+      const bench = buildWaitingBench(4);
+      bench.position.set(0, 0, bz);
+      bench.rotation.y = Math.PI; // Mirando hacia la pantalla de turnos
+      waitGroup.add(bench);
+    });
+
+    // Pantalla digital de llamado de turnos (A - 042)
+    const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshBasicMaterial({
+      map: queueScreenTexture,
+      side: THREE.DoubleSide
+    }));
+    tvScreen.position.set(0, 2.4, -2.8);
+    waitGroup.add(tvScreen);
+
+    // Tótem dispensador digital de números de atención
+    const totemBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.35, 0.35), hospitalEmergencyMat);
+    totemBase.position.set(3.5, 0.68, -1.8);
+    const totemScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.35), new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+    totemScreen.position.set(3.5, 1.15, -1.62);
+    waitGroup.add(totemBase, totemScreen);
+
+    // Dispensador de agua purificada con botellón azul
+    const waterDisp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.95, 0.35), hospitalWhiteTrimMat);
+    waterDisp.position.set(-3.8, 0.48, -2.6);
+    const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.42, 12), new THREE.MeshStandardMaterial({
+      color: 0x0284c7, transparent: true, opacity: 0.8
+    }));
+    bottle.position.set(-3.8, 1.15, -2.6);
+    waitGroup.add(waterDisp, bottle);
+
+    building.add(waitGroup);
+
+    // =========================================================================
+    // PASILLO CLÍNICO LONGITUDINAL Y RECORRIDO (PLANOS DWG)
+    // =========================================================================
+    // Muro divisorio longitudinal entre hall/recepción y los boxes clínicos (con vanos de puertas)
+    const midWallZ = 2.4;
+    const boxDoorSpacing = 8.0;
+
+    // Tabiques longitudinales con zócalo guardacamillas
+    const clinicWallGeo = new THREE.BoxGeometry(mainW - 4, groundH, 0.25);
+    const clinicWall = new THREE.Mesh(clinicWallGeo, interiorWallMat);
+    clinicWall.position.set(0, groundH / 2, midWallZ);
+    building.add(clinicWall);
+
+    // Zócalo guardacamillas gris continuo (anti-impacto)
+    const bumperStrip = new THREE.Mesh(new THREE.BoxGeometry(mainW - 4, 0.2, 0.29), bumperMat);
+    bumperStrip.position.set(0, 0.9, midWallZ - 0.02);
+    building.add(bumperStrip);
+
+    // Equipamiento clínico en el pasillo: Camilla hospitalaria
+    const gurney = buildGurney();
+    gurney.position.set(-5.0, 0, 0.8);
+    gurney.rotation.y = 0.2;
+    building.add(gurney);
+
+    // Silla de ruedas clínica
+    const wheelchair = buildWheelchair();
+    wheelchair.position.set(2.8, 0, 0.6);
+    wheelchair.rotation.y = -0.4;
+    building.add(wheelchair);
+
+    // Boxes de Atención Médica con señalética oficial de los planos:
+    const clinicBoxes = [
+      { x: -22, mat: doorPlateWcMat, name: 'BAÑOS PÚBLICOS' },
+      { x: -14, mat: doorPlateGinecoMat, name: 'BOX GINECOLÓGICO' },
+      { x: -6, mat: doorPlateTriageMat, name: 'TRIAGE / EVALUACIÓN' },
+      { x: 2, mat: doorPlateReaniMat, name: 'BOX REANIMACIÓN' },
+      { x: 10, mat: doorPlateFarmaMat, name: 'FARMACIA Y RECETAS' },
+      { x: 18, mat: doorPlateArchivoMat, name: 'ARCHIVO CLÍNICO' }
+    ];
+
+    clinicBoxes.forEach(box => {
+      // Puerta clínica con marco blanco
+      const dFrame = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.4, 0.3), hospitalWhiteTrimMat);
+      dFrame.position.set(box.x, 1.2, midWallZ);
+      building.add(dFrame);
+
+      // Hoja de puerta en madera clara
+      const dLeaf = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.2, 0.08), deskWoodMat);
+      dLeaf.position.set(box.x, 1.2, midWallZ);
+      building.add(dLeaf);
+
+      // Mirilla circular (ojo de buey)
+      const porthole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 16), glassMat);
+      porthole.rotation.x = Math.PI / 2;
+      porthole.position.set(box.x, 1.5, midWallZ);
+      building.add(porthole);
+
+      // Placa de señalética identificatoria sobre la puerta
+      const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.35), box.mat);
+      signMesh.position.set(box.x, 2.55, midWallZ - 0.16);
+      building.add(signMesh);
+
+      // Tirador de puerta en acero inoxidable
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.3, 6), stainlessDoorMat);
+      handle.position.set(box.x + 0.55, 1.05, midWallZ - 0.06);
+      building.add(handle);
+    });
+
+    // =========================================================================
+    // NÚCLEO VERTICAL: BATERÍA DE ASCENSORES MONTACAMA (PLANOS DWG)
+    // =========================================================================
+    const elevGroup = new THREE.Group();
+    elevGroup.position.set(26, 0, midWallZ);
+
+    [-2.2, 2.2].forEach(ex => {
+      // Marco del ascensor
+      const eFrame = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.7, 0.3), hospitalEmergencyMat);
+      eFrame.position.set(ex, 1.35, 0);
+      elevGroup.add(eFrame);
+
+      // Puertas de acero inoxidable cepillado
+      const eDoors = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.5, 0.06), stainlessDoorMat);
+      eDoors.position.set(ex, 1.25, -0.05);
+      elevGroup.add(eDoors);
+
+      // Ranura central divisoria entre hojas
+      const eSplit = new THREE.Mesh(new THREE.BoxGeometry(0.02, 2.5, 0.08), hospitalEmergencyMat);
+      eSplit.position.set(ex, 1.25, -0.05);
+      elevGroup.add(eSplit);
+
+      // Display digital de piso: PISO 1 ▲
+      const eDisplay = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.2), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+      eDisplay.position.set(ex, 2.65, -0.16);
+      elevGroup.add(eDisplay);
+    });
+
+    // Placa general de ascensores
+    const elevSign = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.4), doorPlateElevMat);
+    elevSign.position.set(0, 3.1, -0.16);
+    elevGroup.add(elevSign);
+
+    building.add(elevGroup);
+
+    // =========================================================================
+    // EXTERIOR: MARQUESINA CURVA, BICICLETERO, CAMIÓN CULTURAL Y RAMPA (FOTOS)
+    // =========================================================================
+    // 1. Marquesina Curva Abovedada de Acceso (Canopy de Fotos 1, 2 y 3)
     const canopyW = 32;  // Ancho frontal
     const canopyD = 7.0; // Vuelo hacia adelante
     const canopyH = 1.6;
 
-    // Bóveda semicilíndrica translúcida
     const canopyGeo = new THREE.CylinderGeometry(canopyD / 1.05, canopyD / 1.05, canopyW, 24, 1, false, 0, Math.PI);
     canopyGeo.rotateZ(Math.PI / 2);
     const canopyMesh = new THREE.Mesh(canopyGeo, canopyGlassMat);
@@ -737,7 +1553,7 @@ export function createLandmarks(geoData) {
       building.add(rib);
     }
 
-    // Columnas metálicas esbeltas de soporte en el borde frontal
+    // Columnas metálicas esbeltas de soporte
     [-14, -9.5, -5, 0, 5, 9.5, 14].forEach((px) => {
       const poleGeo = new THREE.CylinderGeometry(0.09, 0.09, groundH + 0.6, 8);
       const pole = new THREE.Mesh(poleGeo, canopyArchMat);
@@ -745,33 +1561,79 @@ export function createLandmarks(geoData) {
       pole.castShadow = true;
       building.add(pole);
 
-      // Placa base empernada
       const baseGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.06, 8);
       const baseMesh = new THREE.Mesh(baseGeo, hospitalEmergencyMat);
       baseMesh.position.set(px, 0.03, frontZ - canopyD + 0.6);
       building.add(baseMesh);
 
-      // Foco LED cálido bajo el techo de la marquesina
       const lampGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 8);
       const lamp = new THREE.Mesh(lampGeo, warmLampMat);
       lamp.position.set(px, groundH + 0.55, frontZ - canopyD / 2);
       building.add(lamp);
     });
 
-    // Puerta de acceso vidriada / Mampara
-    const lobbyW = 8.0, lobbyH = 2.8, lobbyD = 2.0;
-    const lobbyGeo = new THREE.BoxGeometry(lobbyW, lobbyH, lobbyD);
-    const lobby = new THREE.Mesh(lobbyGeo, glassMat);
-    lobby.position.set(0, lobbyH / 2, frontZ - lobbyD / 2 + 0.2);
-    building.add(lobby);
+    // 2. Compresor exterior de Aire Acondicionado (Foto real al costado izquierdo de la entrada)
+    const acUnit = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.7, 0.35), hospitalWhiteTrimMat);
+    acUnit.position.set(5.5, 1.15, frontZ - 0.2);
+    building.add(acUnit);
 
-    // Marco blanco de mampara
-    const lobbyFrameGeo = new THREE.BoxGeometry(lobbyW + 0.1, 0.1, lobbyD + 0.1);
-    const lobbyFrame = new THREE.Mesh(lobbyFrameGeo, hospitalWhiteTrimMat);
-    lobbyFrame.position.set(0, lobbyH, frontZ - lobbyD / 2 + 0.2);
-    building.add(lobbyFrame);
+    const acGrille = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.02, 12), hospitalEmergencyMat);
+    acGrille.rotation.x = Math.PI / 2;
+    acGrille.position.set(5.5, 1.15, frontZ - 0.38);
+    building.add(acGrille);
 
-    // 4. Letrero Frontal Oficial "HOSPITAL DE PUERTO AYSÉN" (Fotos 1 y 3)
+    // 3. Soporte Bicicletero con Bicicletas Estacionadas (Foto real al costado izquierdo bajo el alero)
+    const bikeRackGroup = new THREE.Group();
+    bikeRackGroup.position.set(10.5, 0, frontZ - 3.2);
+
+    // Barras en U invertida de acero inoxidable
+    for (let rx = -2.5; rx <= 2.5; rx += 1.0) {
+      const uGeo = new THREE.TorusGeometry(0.4, 0.025, 6, 16, Math.PI);
+      const uBar = new THREE.Mesh(uGeo, stainlessDoorMat);
+      uBar.position.set(rx, 0.45, 0);
+      bikeRackGroup.add(uBar);
+    }
+
+    // Bicicletas aparcadas de diferentes colores (como en la foto del usuario)
+    const bikeColors = [0xdc2626, 0x0284c7, 0x1e293b, 0xfacc15, 0x16a34a, 0x9333ea];
+    [-2.2, -1.3, -0.4, 0.5, 1.4, 2.3].forEach((bx, idx) => {
+      const bike = buildBicycle(bikeColors[idx % bikeColors.length]);
+      bike.position.set(bx, 0, (idx % 2 === 0 ? 0.1 : -0.1));
+      bike.rotation.y = (idx % 2 === 0 ? 0.05 : -0.05);
+      bikeRackGroup.add(bike);
+    });
+    building.add(bikeRackGroup);
+
+    // 4. Camión Cultural / Móvil Parked (Región de Aysén - VH·SJ·31, costado derecho de la foto)
+    const cultureTruck = buildCultureTruck();
+    cultureTruck.position.set(-9.5, 0.05, frontZ - 10.5);
+    cultureTruck.rotation.y = 0.18; // Perfilado idéntico a la fotografía real
+    building.add(cultureTruck);
+
+    // 5. Paseo Peatonal y Guía Podotáctil Amarilla continua (Foto del usuario)
+    const walkwayGeo = new THREE.PlaneGeometry(5.2, 32);
+    walkwayGeo.rotateX(-Math.PI / 2);
+    const walkway = new THREE.Mesh(walkwayGeo, hospitalPaveMat);
+    walkway.position.set(0, 0.03, frontZ - 16);
+    building.add(walkway);
+
+    // Franja táctil amarilla que guía a invidentes desde la calle hasta la entrada
+    const tactileStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 30), tactileYellowMat);
+    tactileStrip.rotateX(-Math.PI / 2);
+    tactileStrip.position.set(0.6, 0.04, frontZ - 15);
+    building.add(tactileStrip);
+
+    // Rampa lateral derecha con muro de hormigón y baranda tubular de acero inoxidable (como foto real)
+    const rampWall = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.85, 16), hospitalBaseMat);
+    rampWall.position.set(-3.2, 0.42, frontZ - 14);
+    building.add(rampWall);
+
+    const rampRail = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 16, 8), stainlessDoorMat);
+    rampRail.rotation.x = Math.PI / 2;
+    rampRail.position.set(-3.2, 0.95, frontZ - 14);
+    building.add(rampRail);
+
+    // 6. Letrero Frontal Oficial en Letras 3D de Aluminio "HOSPITAL DE PUERTO AYSEN"
     const signBoardMat = new THREE.MeshBasicMaterial({
       map: hospitalSignTexture,
       transparent: true
@@ -779,10 +1641,10 @@ export function createLandmarks(geoData) {
     const signBoardGeo = new THREE.PlaneGeometry(24, 3.0);
     const signBoard = new THREE.Mesh(signBoardGeo, signBoardMat);
     signBoard.position.set(0, groundH + 5.5, frontZ - 0.22);
-    signBoard.rotation.y = Math.PI; // Mira al Norte
+    signBoard.rotation.y = Math.PI; // Mira al Norte hacia la plaza
     building.add(signBoard);
 
-    // 5. Ala de Urgencias y Bahía de Ambulancias (SAMU 131)
+    // 7. Ala de Urgencias y Bahía de Ambulancias (SAMU 131)
     const urgW = 24, urgH = 7.6, urgD = 20;
     const urgGeo = new THREE.BoxGeometry(urgW, urgH, urgD);
     const urgMesh = new THREE.Mesh(urgGeo, hospitalEmergencyMat);
@@ -832,27 +1694,23 @@ export function createLandmarks(geoData) {
     // Ambulancia SAMU 131 estacionada bajo el alero
     const ambGroup = new THREE.Group();
     ambGroup.position.set(-mainW / 2 - 10, 0, frontZ - 4.5);
-    ambGroup.rotation.y = -0.15; // Ligeramente perfilada
+    ambGroup.rotation.y = -0.15;
 
-    // Carrocería van blanca
     const ambBodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
     const ambBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.1, 5.2), ambBodyMat);
     ambBody.position.y = 1.3;
     ambBody.castShadow = true;
 
-    // Franjas reflectantes rojas laterales
     const stripeMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     const stripeL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.25, 4.6), stripeMat);
     stripeL.position.set(-1.12, 1.25, 0);
     const stripeR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.25, 4.6), stripeMat);
     stripeR.position.set(1.12, 1.25, 0);
 
-    // Cabina y parabrisas polarizado
     const cabWinMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1, metalness: 0.8 });
     const cabWin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.8, 0.1), cabWinMat);
     cabWin.position.set(0, 1.6, -2.55);
 
-    // Baliza de emergencia en el techo (roja y azul)
     const beaconBar = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.18, 0.4), hospitalEmergencyMat);
     beaconBar.position.set(0, 2.45, -0.6);
     const beaconR = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.16, 0.35), redCrossMat);
@@ -862,7 +1720,6 @@ export function createLandmarks(geoData) {
     }));
     beaconB.position.set(0.35, 2.48, -0.6);
 
-    // Ruedas de ambulancia
     const ambWheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
     [[-1.0, 0.4, -1.6], [1.0, 0.4, -1.6], [-1.0, 0.4, 1.6], [1.0, 0.4, 1.6]].forEach(([wx, wy, wz]) => {
       const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.28, 12), ambWheelMat);
@@ -875,15 +1732,14 @@ export function createLandmarks(geoData) {
     ambGroup.add(ambBody, stripeL, stripeR, cabWin, beaconBar, beaconR, beaconB);
     building.add(ambGroup);
 
-    // 6. Fenestración Arquitectónica (Ventanales con marcos blancos de Fotos 2 y 3)
-    // Nivel 3 (Piso Superior): grupos de ventanas en alas laterales despejando el letrero central
+    // 8. Fenestración Arquitectónica de Fachada
+    // Piso 3: Grupos de ventanas despejando el letrero central
     const clusterPositions = [-26, -16, 16, 26];
     clusterPositions.forEach((cx) => {
       const clusterFrame = new THREE.Mesh(new THREE.BoxGeometry(9.6, 2.2, 0.12), hospitalWhiteTrimMat);
       clusterFrame.position.set(cx, groundH + 5.2, frontZ - 0.05);
       building.add(clusterFrame);
 
-      // Vidrios cuádruples
       for (let w = 0; w < 4; w++) {
         const wx = cx - 3.6 + w * 2.4;
         const win = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.9, 0.06), glassMat);
@@ -892,7 +1748,7 @@ export function createLandmarks(geoData) {
       }
     });
 
-    // Nivel 2 (Piso Medio): Ribbon windows corridos con montantes blancos
+    // Piso 2: Ribbon windows corridos con montantes blancos
     for (let wx = -mainW / 2 + 5; wx <= mainW / 2 - 5; wx += 4.5) {
       const mFrame = new THREE.Mesh(new THREE.BoxGeometry(4.0, 1.8, 0.12), hospitalWhiteTrimMat);
       mFrame.position.set(wx, groundH + 1.8, frontZ - 0.05);
@@ -903,7 +1759,7 @@ export function createLandmarks(geoData) {
       building.add(win);
     }
 
-    // Nivel 1 (Piso 1, Zócalo verde oliva): Ventanales modulares
+    // Piso 1 (Zócalo verde oliva): Ventanales modulares (con vistas hacia el exterior)
     for (let wx = -mainW / 2 + 6; wx <= mainW / 2 - 6; wx += 5.5) {
       if (Math.abs(wx) < 6) continue; // Despejar lobby central
       const gFrame = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.6, 0.12), hospitalWhiteTrimMat);
@@ -915,20 +1771,20 @@ export function createLandmarks(geoData) {
       building.add(win);
     }
 
-    // 7. Explanada de Acceso, Plaza y Estacionamiento (Fotos 2 y 3)
-    const plazaW = 90;
-    const plazaD = 42;
-    const plazaZ = frontZ - plazaD / 2; // -11 - 21 = -32m
+    // 9. Explanada de Acceso, Plaza y Estacionamiento (Fotos 2 y 3)
+    const plazaW = 96;
+    const plazaD = 44;
+    const plazaZ = frontZ - plazaD / 2;
 
     const plazaGeo = new THREE.PlaneGeometry(plazaW, plazaD);
     plazaGeo.rotateX(-Math.PI / 2);
     const plazaMesh = new THREE.Mesh(plazaGeo, hospitalPaveMat);
-    plazaMesh.position.set(0, 0.05, plazaZ);
+    plazaMesh.position.set(0, 0.04, plazaZ);
     plazaMesh.receiveShadow = true;
     building.add(plazaMesh);
 
-    // Cierre perimetral frontal (murete verde + reja blanca, visto en Foto 2)
-    const fenceZ = frontZ - plazaD + 2; // -51m
+    // Cierre perimetral frontal (murete verde + reja blanca)
+    const fenceZ = frontZ - plazaD + 2;
     const wallH = 0.9;
     const railH = 0.8;
 
@@ -944,7 +1800,7 @@ export function createLandmarks(geoData) {
       building.add(railMesh);
     });
 
-    // 8. Vehículos Estacionados (Autos civiles de la Foto 2)
+    // 10. Vehículos Estacionados Civiles
     const car1 = buildParkedCar(0xffffff, 'pickup');
     car1.position.set(20, 0.05, frontZ - 24);
     car1.rotation.y = Math.PI / 2;
@@ -960,7 +1816,7 @@ export function createLandmarks(geoData) {
     car3.rotation.y = Math.PI / 2;
     building.add(car3);
 
-    // 9. Luminarias de Jardín (Postes modernos con globo cálido)
+    // Postes de iluminación modernos
     [-18, -6, 6, 18].forEach((lx) => {
       const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.4, 8), hospitalEmergencyMat);
       post.position.set(lx, 1.2, frontZ - 18);
@@ -972,7 +1828,7 @@ export function createLandmarks(geoData) {
       building.add(post, globe);
     });
 
-    // 10. Arbustos Patagónicos y Flores (Notro / Ciruelillo con detalles rojos de Foto 3)
+    // Arbustos Patagónicos y Flores (Notro / Ciruelillo con flores rojas de la foto)
     const shrubGeo = new THREE.SphereGeometry(1.2, 8, 8);
     const shrubMat = new THREE.MeshStandardMaterial({ color: 0x2d4a22, roughness: 0.85 });
     const berryMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.6 });

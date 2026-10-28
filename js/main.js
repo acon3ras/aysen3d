@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { AYSEN_GEO } from './aysen-geodata.js';
 import { createPuenteIbanez } from './puente-ibanez.js';
 import { createRiverSystem } from './river-system.js';
-import { createPatagonianBuildings } from './patagonian-houses.js';
+import { createPatagonianBuildings } from './patagonian-houses.js?v=hospital-v6';
 import { createPatagonianFoliage } from './trees.js';
 import { createUrbanFurniture } from './urban-furniture.js';
 import { createRoadNetwork } from './road-network.js';
 import { createPatagonianTerrain } from './terrain.js';
 import { createMinimap } from './minimap.js';
 import { createStreetDetails } from './street-details.js';
-import { createLandmarks } from './landmarks.js';
+import { createLandmarks } from './landmarks.js?v=hospital-v6';
 import { setupPostProcessing } from './postprocessing.js';
 import { createWeatherEffects } from './weather-effects.js';
 import { createAudioManager } from './audio-manager.js';
@@ -207,7 +207,9 @@ const SPAWN_PRESETS = {
   puente: { pos: [0, 7.8, 35], lookAt: [0, 8.0, 100], yaw: Math.PI, label: 'Puente Presidente Ibáñez' },
   plaza: { pos: [-1107, 0.4, 236], lookAt: [-1107, 1.5, 219], yaw: 0, label: 'Plaza de Armas' },
   muni: { pos: [-1113.7, 0.4, 216], lookAt: [-1113.7, 4.5, 187.1], yaw: 0, label: 'Ilustre Municipalidad' },
-  hospital: { pos: [15.0, 0.4, 355], lookAt: [15.0, 5.5, 420], yaw: 0, label: 'Hospital de Puerto Aysén' },
+  hospital: { pos: [15.0, 0.4, 315], lookAt: [15.0, 5.5, 430], yaw: 0, label: 'Hospital de Puerto Aysén (Vista Completa)' },
+  hospital_frontis: { pos: [15.0, 0.4, 396], lookAt: [15.0, 2.8, 420], yaw: 0, label: 'Hospital (Frontis y Acceso)' },
+  hospital_interior: { pos: [14.0, 0.2, 422.0], lookAt: [20.0, 1.8, 425.5], yaw: -0.8, label: 'Interior Hospital (SOME / Espera)' },
   comisaria: { pos: [-1005, 0.4, 172], lookAt: [-1005.4, 4.5, 149.4], yaw: 0, label: '2ª Comisaría (Tierras y Colonización)' },
   costanera: { pos: [-480, 0.4, 122], lookAt: [-480, 2.0, 50], yaw: -Math.PI / 2, label: 'Costanera Río Aysén' },
   ribera_norte: { pos: [30, 0.4, -170], lookAt: [0, 7.5, 0], yaw: 0, label: 'Ribera Norte' }
@@ -295,6 +297,11 @@ document.addEventListener('mousemove', (e) => {
 window.teleportTo = function(id) {
   const spawn = SPAWN_PRESETS[id];
   if (!spawn) return;
+
+  if (id === 'hospital_interior') {
+    // Si teletransporta al interior del hospital, activar automáticamente modo peatonal
+    setGameMode('walk');
+  }
 
   if (currentMode === 'drive' || currentMode === 'cycle') {
     vehicle.teleport(spawn.pos[0], spawn.pos[2], spawn.yaw !== undefined ? spawn.yaw : Math.PI);

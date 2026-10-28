@@ -74,6 +74,10 @@ export function createPatagonianBuildings(geoData) {
     const ring = b.ring;
     if (ring.length < 6) return;
 
+    // Excluir cualquier huella genérica que invada el predio o la línea de visión del Hospital
+    const cx = ring[0], cz = ring[1];
+    if (cx > -60 && cx < 95 && cz > 270 && cz < 480) return;
+
     const hash = getHash(b.id);
     const wallMatIdx = hash % wallColors.length;
     const roofMatIdx = (hash >> 3) % roofColors.length;
