@@ -64,6 +64,9 @@ export function createPatagonianFoliage(geoData) {
     const x = plazaX + Math.cos(ang) * rad;
     const z = plazaZ + Math.sin(ang) * rad;
 
+    // Despejar la huella y explanada cívica de la Municipalidad
+    if (Math.abs(x - (-1113.7)) < 20 && Math.abs(z - 187.1) < 20) continue;
+
     const scale = 0.85 + Math.random() * 0.4;
     dummy.position.set(x, 0.2, z);
     dummy.scale.set(scale, scale, scale);

@@ -1,11 +1,47 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+// Cargador GLTF/Draco preparado para modelos externos de fotogrametría (.glb)
+let dracoLoader = null;
+let gltfLoader = null;
+
+export function loadGLB(path, position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1], onLoad, onError) {
+  if (!gltfLoader) {
+    dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://unpkg.com/three@0.169.0/examples/jsm/libs/draco/');
+    gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+  }
+
+  gltfLoader.load(
+    path,
+    (gltf) => {
+      const model = gltf.scene;
+      model.position.set(...position);
+      model.rotation.set(...rotation);
+      model.scale.set(...scale);
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      if (onLoad) onLoad(model);
+    },
+    undefined,
+    (err) => {
+      console.warn(`[Landmarks] loadGLB no pudo cargar ${path}:`, err);
+      if (onError) onError(err);
+    }
+  );
+}
 
 /**
  * Hitos Arquitectónicos Notables de Puerto Aysén (Nivel 3)
- * Incluye la recreación de la emblemática:
- * Oficina de Tierras y Colonización de Puerto Aysén (1932)
- * Actualmente 2ª Comisaría de Carabineros de Puerto Aysén (Monumento Histórico Nacional)
- * Ubicación real: Calle Bernardo O'Higgins #553 (X: -1005.4m, Z: 149.4m)
+ * Incluye:
+ * 1. Oficina de Tierras y Colonización (1932) / 2ª Comisaría de Carabineros (Monumento Histórico)
+ * 2. Ilustre Municipalidad de Puerto Aysén (Edificio Consistorial, Esmeralda #607)
  */
 export function createLandmarks(geoData) {
   const landmarksGroup = new THREE.Group();
@@ -30,7 +66,7 @@ export function createLandmarks(geoData) {
   });
 
   const stonePlinthMat = new THREE.MeshStandardMaterial({
-    color: 0x64748b, // Zócalo elevado de piedra
+    color: 0x64748b, // Zócalo elevado de piedra / fundación
     roughness: 0.95
   });
 
@@ -40,6 +76,36 @@ export function createLandmarks(geoData) {
     metalness: 0.9,
     transparent: true,
     opacity: 0.75
+  });
+
+  // Materiales de la Ilustre Municipalidad
+  const muniWallMat = new THREE.MeshStandardMaterial({
+    color: 0xf3f2ea, // Crema institucional patagónico
+    roughness: 0.78,
+    metalness: 0.05
+  });
+
+  const muniRoofMat = new THREE.MeshStandardMaterial({
+    color: 0x334155, // Zinc gris pizarra patagónico
+    roughness: 0.45,
+    metalness: 0.65
+  });
+
+  const pillarMat = new THREE.MeshStandardMaterial({
+    color: 0xe2e8f0, // Hormigón claro del pórtico
+    roughness: 0.55
+  });
+
+  const goldEmblemMat = new THREE.MeshStandardMaterial({
+    color: 0xd97706, // Escudo y placas doradas
+    metalness: 0.85,
+    roughness: 0.25
+  });
+
+  const warmLampMat = new THREE.MeshStandardMaterial({
+    color: 0xfef08a,
+    emissive: 0xfef08a,
+    emissiveIntensity: 1.8 // Brilla cálido en Bloom
   });
 
   // ---------------------------------------------------------------------------
@@ -171,7 +237,187 @@ export function createLandmarks(geoData) {
     return building;
   }
 
+  // ---------------------------------------------------------------------------
+  // 2. ILUSTRE MUNICIPALIDAD DE PUERTO AYSÉN (EDIFICIO CONSISTORIAL)
+  // Ubicación OSM: Calle Esmeralda #607 (X: -1113.7m, Z: 187.1m)
+  // ---------------------------------------------------------------------------
+  function buildMunicipalidad() {
+    const building = new THREE.Group();
+    building.name = 'MunicipalidadDeAysen';
+    building.position.set(-1113.7, 0.2, 187.1);
+    building.rotation.y = -0.35; // Alineado a Calle Esmeralda y Plaza de Armas
+
+    const width = 30;   // Frente sobre Esmeralda
+    const depth = 22;   // Fondo hacia la Plaza
+    const height = 7.6; // 2 plantas de 3.8m
+
+    // 1. Zócalo cívico elevado
+    const plinthGeo = new THREE.BoxGeometry(width + 0.8, 0.6, depth + 0.8);
+    const plinth = new THREE.Mesh(plinthGeo, stonePlinthMat);
+    plinth.position.y = 0.3;
+    plinth.receiveShadow = true;
+    building.add(plinth);
+
+    // 2. Volumen Principal de Dos Plantas
+    const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+    const body = new THREE.Mesh(bodyGeo, muniWallMat);
+    body.position.y = 0.6 + height / 2;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    building.add(body);
+
+    // 3. Moldura divisoria entre pisos (cornisa perimetral)
+    const beltGeo = new THREE.BoxGeometry(width + 0.3, 0.2, depth + 0.3);
+    const belt = new THREE.Mesh(beltGeo, trimWhiteMat);
+    belt.position.y = 0.6 + height / 2;
+    building.add(belt);
+
+    // 4. Cubierta a Cuatro Aguas de Zinc Pizarra con Aleros
+    const roofH = 4.5;
+    const roofGeo = new THREE.ConeGeometry(Math.hypot(width, depth) / 1.78, roofH, 4);
+    roofGeo.rotateY(Math.PI / 4);
+    const roof = new THREE.Mesh(roofGeo, muniRoofMat);
+    roof.position.y = 0.6 + height + roofH / 2;
+    roof.scale.set(width / 18, 1, depth / 18);
+    roof.castShadow = true;
+    building.add(roof);
+
+    // 5. Buhardillas / Lucarnas en el ático (mirando a Plaza y Esmeralda)
+    [-6, 0, 6].forEach((bx) => {
+      // Cara Sur (Esmeralda)
+      const dormerGeo = new THREE.BoxGeometry(2.2, 1.8, 1.8);
+      const dormer = new THREE.Mesh(dormerGeo, muniWallMat);
+      dormer.position.set(bx, 0.6 + height + 1.2, depth / 2 - 0.5);
+      building.add(dormer);
+
+      const dormerRoofGeo = new THREE.ConeGeometry(1.8, 1.2, 4);
+      dormerRoofGeo.rotateY(Math.PI / 4);
+      const dormerRoof = new THREE.Mesh(dormerRoofGeo, muniRoofMat);
+      dormerRoof.position.set(bx, 0.6 + height + 2.3, depth / 2 - 0.5);
+      building.add(dormerRoof);
+
+      // Ventana de la buhardilla
+      const dWin = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), glassMat);
+      dWin.position.set(bx, 0.6 + height + 1.2, depth / 2 + 0.42);
+      building.add(dWin);
+    });
+
+    // 6. Pórtico de Acceso Principal (Frontis Esmeralda)
+    const porchW = 8.0;
+    const porchH = 4.8;
+    const porchD = 3.0;
+
+    // Rampa y escalinata de acceso
+    const rampGeo = new THREE.BoxGeometry(porchW + 1.2, 0.4, 2.0);
+    const ramp = new THREE.Mesh(rampGeo, stonePlinthMat);
+    ramp.position.set(0, 0.2, depth / 2 + 1.8);
+    building.add(ramp);
+
+    // 4 Columnas del Pórtico Institucional
+    [-3.2, -1.1, 1.1, 3.2].forEach((cx) => {
+      const colGeo = new THREE.CylinderGeometry(0.3, 0.35, porchH, 12);
+      const col = new THREE.Mesh(colGeo, pillarMat);
+      col.position.set(cx, 0.4 + porchH / 2, depth / 2 + porchD);
+      col.castShadow = true;
+      building.add(col);
+    });
+
+    // Entablamento / Marquesina del Pórtico
+    const archGeo = new THREE.BoxGeometry(porchW + 0.8, 0.7, porchD + 0.6);
+    const arch = new THREE.Mesh(archGeo, muniWallMat);
+    arch.position.set(0, 0.4 + porchH + 0.35, depth / 2 + porchD / 2 + 0.2);
+    building.add(arch);
+
+    // Frontón Triangular Superior sobre el Pórtico
+    const pedimentGeo = new THREE.ConeGeometry(porchW / 1.7, 2.0, 4);
+    pedimentGeo.rotateY(Math.PI / 4);
+    const pediment = new THREE.Mesh(pedimentGeo, muniWallMat);
+    pediment.position.set(0, 0.4 + porchH + 1.7, depth / 2 + porchD - 0.2);
+    pediment.scale.set(1, 1, 0.25);
+    building.add(pediment);
+
+    // Escudo Municipal de Aysén en el tímpano del frontón
+    const crestGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.1, 16);
+    crestGeo.rotateX(Math.PI / 2);
+    const crest = new THREE.Mesh(crestGeo, goldEmblemMat);
+    crest.position.set(0, 0.4 + porchH + 1.5, depth / 2 + porchD + 0.05);
+    building.add(crest);
+
+    // Letrero: MUNICIPALIDAD DE AYSÉN
+    const signGeo = new THREE.BoxGeometry(porchW - 0.8, 0.45, 0.08);
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }); // Azul institucional
+    const sign = new THREE.Mesh(signGeo, signMat);
+    sign.position.set(0, 0.4 + porchH + 0.35, depth / 2 + porchD + 0.32);
+    building.add(sign);
+
+    // Mástiles de Banderas Cívicas (Chile y Aysén) sobre el pórtico
+    [-2.2, 2.2].forEach((fx, idx) => {
+      const poleGeo = new THREE.CylinderGeometry(0.04, 0.05, 4.5, 8);
+      const pole = new THREE.Mesh(poleGeo, new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 }));
+      pole.position.set(fx, 0.4 + porchH + 2.8, depth / 2 + porchD + 0.1);
+      building.add(pole);
+
+      // Bandera (Plano ondeante)
+      const flagGeo = new THREE.PlaneGeometry(1.6, 1.0);
+      const flagMat = new THREE.MeshStandardMaterial({
+        color: idx === 0 ? 0x0284c7 : 0xdc2626, // Azul/Rojo institucional
+        side: THREE.DoubleSide
+      });
+      const flag = new THREE.Mesh(flagGeo, flagMat);
+      flag.position.set(fx + 0.8, 0.4 + porchH + 4.2, depth / 2 + porchD + 0.1);
+      building.add(flag);
+    });
+
+    // Faroles de entrada con emisión Bloom
+    [-porchW / 2 + 0.2, porchW / 2 - 0.2].forEach((lx) => {
+      const lampGeo = new THREE.SphereGeometry(0.22, 12, 12);
+      const lamp = new THREE.Mesh(lampGeo, warmLampMat);
+      lamp.position.set(lx, 0.4 + porchH * 0.7, depth / 2 + porchD + 0.2);
+      building.add(lamp);
+    });
+
+    // 7. Ventanales Ritmados en Fachadas (Esmeralda y Plaza de Armas)
+    for (let floor = 0; floor < 2; floor++) {
+      const wy = 2.4 + floor * 3.4;
+      // Ventanas frontales Esmeralda
+      for (let w = -4; w <= 4; w++) {
+        if (floor === 0 && Math.abs(w) <= 1) continue; // Puerta principal
+        const wx = w * 3.0;
+
+        const fGeo = new THREE.BoxGeometry(1.5, 2.0, 0.08);
+        const fMesh = new THREE.Mesh(fGeo, trimWhiteMat);
+        fMesh.position.set(wx, wy, depth / 2 + 0.05);
+        building.add(fMesh);
+
+        const gGeo = new THREE.PlaneGeometry(1.2, 1.7);
+        const gMesh = new THREE.Mesh(gGeo, glassMat);
+        gMesh.position.set(wx, wy, depth / 2 + 0.1);
+        building.add(gMesh);
+      }
+
+      // Ventanas traseras (hacia Plaza de Armas)
+      for (let w = -4; w <= 4; w++) {
+        const wx = w * 3.0;
+        const fGeo = new THREE.BoxGeometry(1.5, 2.0, 0.08);
+        const fMesh = new THREE.Mesh(fGeo, trimWhiteMat);
+        fMesh.position.set(wx, wy, -depth / 2 - 0.05);
+        fMesh.rotation.y = Math.PI;
+        building.add(fMesh);
+
+        const gGeo = new THREE.PlaneGeometry(1.2, 1.7);
+        const gMesh = new THREE.Mesh(gGeo, glassMat);
+        gMesh.position.set(wx, wy, -depth / 2 - 0.1);
+        gMesh.rotation.y = Math.PI;
+        building.add(gMesh);
+      }
+    }
+
+    return building;
+  }
+
+  // Instanciar hitos patrimoniales
   landmarksGroup.add(buildOficinaTierras());
+  landmarksGroup.add(buildMunicipalidad());
 
   return landmarksGroup;
 }

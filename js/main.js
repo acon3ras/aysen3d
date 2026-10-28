@@ -202,6 +202,7 @@ const minimap = createMinimap('minimap-canvas', AYSEN_GEO);
 const SPAWN_PRESETS = {
   puente: { pos: [0, 8.5, 45], lookAt: [0, 8.5, -80], label: 'Puente Presidente Ibáñez' },
   plaza: { pos: [-1107, 2.4, 236], lookAt: [-1107, 2.5, 219], label: 'Plaza de Armas' },
+  muni: { pos: [-1113.7, 4.2, 218], lookAt: [-1113.7, 5.0, 187.1], label: 'Municipalidad de Aysén' },
   costanera: { pos: [-480, 2.2, 122], lookAt: [-480, 2.0, 50], label: 'Costanera Río Aysén' },
   comisaria: { pos: [-1005, 3.2, 172], lookAt: [-1005.4, 4.5, 149.4], label: '2ª Comisaría (Tierras y Colonización)' },
   ribera_norte: { pos: [30, 8.5, -170], lookAt: [0, 7.5, 0], label: 'Ribera Norte' }

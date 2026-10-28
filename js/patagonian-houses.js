@@ -60,7 +60,14 @@ export function createPatagonianBuildings(geoData) {
     return h;
   };
 
+  // Edificios que cuentan con modelado Nivel 3 detallado en landmarks.js
+  const EXCLUDED_LANDMARK_IDS = new Set([
+    836943359, // Oficina de Tierras y Colonización (2ª Comisaría)
+    434686872  // Ilustre Municipalidad de Aysén
+  ]);
+
   buildings.forEach((b) => {
+    if (EXCLUDED_LANDMARK_IDS.has(b.id)) return;
     const ring = b.ring;
     if (ring.length < 6) return;
 
