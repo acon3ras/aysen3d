@@ -776,9 +776,9 @@ export function createLandmarks(geoData) {
       map: hospitalSignTexture,
       transparent: true
     });
-    const signBoardGeo = new THREE.PlaneGeometry(26, 3.25);
+    const signBoardGeo = new THREE.PlaneGeometry(24, 3.0);
     const signBoard = new THREE.Mesh(signBoardGeo, signBoardMat);
-    signBoard.position.set(0, groundH + 5.2, frontZ - 0.08);
+    signBoard.position.set(0, groundH + 5.5, frontZ - 0.22);
     signBoard.rotation.y = Math.PI; // Mira al Norte
     building.add(signBoard);
 
@@ -876,8 +876,8 @@ export function createLandmarks(geoData) {
     building.add(ambGroup);
 
     // 6. Fenestración Arquitectónica (Ventanales con marcos blancos de Fotos 2 y 3)
-    // Nivel 3 (Piso Superior): 4 grupos de 4 ventanas con marcos blancos
-    const clusterPositions = [-24, -10, 10, 24];
+    // Nivel 3 (Piso Superior): grupos de ventanas en alas laterales despejando el letrero central
+    const clusterPositions = [-26, -16, 16, 26];
     clusterPositions.forEach((cx) => {
       const clusterFrame = new THREE.Mesh(new THREE.BoxGeometry(9.6, 2.2, 0.12), hospitalWhiteTrimMat);
       clusterFrame.position.set(cx, groundH + 5.2, frontZ - 0.05);

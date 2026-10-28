@@ -65,7 +65,8 @@ export function createPatagonianBuildings(geoData) {
     836943359, // Oficina de Tierras y Colonización (2ª Comisaría)
     434686872, // Ilustre Municipalidad de Aysén
     625135601, // Hospital de Puerto Aysén (Edificio Principal)
-    364383065  // Hospital de Puerto Aysén (Ala de Urgencias / Servicios)
+    364383065, // Hospital de Puerto Aysén (Ala de Urgencias / Servicios)
+    1182361091 // Despejar antejardín y acceso frontal del Hospital
   ]);
 
   buildings.forEach((b) => {
