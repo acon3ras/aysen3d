@@ -108,6 +108,50 @@ export function createLandmarks(geoData) {
     emissiveIntensity: 1.8 // Brilla cálido en Bloom
   });
 
+  // Materiales del Hospital de Puerto Aysén (basados en fotos reales)
+  const hospitalBaseMat = new THREE.MeshStandardMaterial({
+    color: 0x606c38, // Verde oliva / salvia patagónico del 1er piso
+    roughness: 0.85,
+    metalness: 0.05
+  });
+
+  const hospitalWoodMat = new THREE.MeshStandardMaterial({
+    color: 0xd97706, // Listones horizontales de madera cálida (cedro / alerce)
+    roughness: 0.65,
+    metalness: 0.1
+  });
+
+  const hospitalWoodAccentMat = new THREE.MeshStandardMaterial({
+    color: 0x78350f, // Franjas de contraste en madera oscura
+    roughness: 0.6,
+    metalness: 0.1
+  });
+
+  const hospitalEmergencyMat = new THREE.MeshStandardMaterial({
+    color: 0x334155, // Gris grafito moderno del ala de urgencias
+    roughness: 0.55,
+    metalness: 0.3
+  });
+
+  const canopyArchMat = new THREE.MeshStandardMaterial({
+    color: 0xe2e8f0, // Estructura metálica plateada de la marquesina
+    metalness: 0.85,
+    roughness: 0.25
+  });
+
+  const canopyGlassMat = new THREE.MeshStandardMaterial({
+    color: 0xa5f3fc, // Vidrio / policarbonato translúcido abovedado
+    transparent: true,
+    opacity: 0.6,
+    roughness: 0.15
+  });
+
+  const hospitalLettersMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b, // Letras metálicas oscuras "HOSPITAL DE PUERTO AYSÉN"
+    metalness: 0.8,
+    roughness: 0.3
+  });
+
   // ---------------------------------------------------------------------------
   // 1. OFICINA DE TIERRAS Y COLONIZACIÓN (1932)
   // ---------------------------------------------------------------------------
@@ -415,9 +459,143 @@ export function createLandmarks(geoData) {
     return building;
   }
 
+  // ---------------------------------------------------------------------------
+  // 3. HOSPITAL DR. JORGE IBAR DE PUERTO AYSÉN
+  // Ubicación OSM: Camino a Chacabuco / Eusebio Ibar (X: 15.0m, Z: 444.5m)
+  // Recreación fiel basada en las fotos reales y bosquejo arquitectónico:
+  // - Zócalo de hormigón verde oliva / salvia (piso 1)
+  // - Revestimiento superior en listones horizontales de madera cálida (pisos 2 y 3)
+  // - Marquesina curva abovedada de policarbonato translúcido sobre el acceso
+  // - Letrero frontal: "HOSPITAL DE PUERTO AYSÉN"
+  // - Ala de Urgencias y ambulancias en gris grafito con cruz roja
+  // ---------------------------------------------------------------------------
+  function buildHospital() {
+    const building = new THREE.Group();
+    building.name = 'HospitalDePuertoAysen';
+    building.position.set(15.0, 0.2, 444.5);
+    building.rotation.y = 0.08;
+
+    const mainW = 54;    // Frente principal
+    const mainD = 22;    // Fondo
+    const groundH = 3.6; // Piso 1 (zócalo verde oliva)
+    const upperH = 7.0;  // Pisos 2 y 3 (madera cálida)
+    const totalH = groundH + upperH;
+
+    // 1. Zócalo / Primer Piso en verde oliva patagónico
+    const groundGeo = new THREE.BoxGeometry(mainW, groundH, mainD);
+    const groundMesh = new THREE.Mesh(groundGeo, hospitalBaseMat);
+    groundMesh.position.y = groundH / 2;
+    groundMesh.castShadow = true;
+    groundMesh.receiveShadow = true;
+    building.add(groundMesh);
+
+    // 2. Pisos Superiores (2 y 3) en listones de madera cálida
+    const upperGeo = new THREE.BoxGeometry(mainW, upperH, mainD);
+    const upperMesh = new THREE.Mesh(upperGeo, hospitalWoodMat);
+    upperMesh.position.y = groundH + upperH / 2;
+    upperMesh.castShadow = true;
+    upperMesh.receiveShadow = true;
+    building.add(upperMesh);
+
+    // Franjas de acento horizontal de madera oscura
+    for (let h = 0; h < 2; h++) {
+      const bandGeo = new THREE.BoxGeometry(mainW + 0.1, 0.25, mainD + 0.1);
+      const band = new THREE.Mesh(bandGeo, hospitalWoodAccentMat);
+      band.position.y = groundH + 3.4 * (h + 1);
+      building.add(band);
+    }
+
+    // Cubierta plana institucional con antepecho
+    const parapetGeo = new THREE.BoxGeometry(mainW + 0.2, 0.6, mainD + 0.2);
+    const parapet = new THREE.Mesh(parapetGeo, hospitalEmergencyMat);
+    parapet.position.y = totalH + 0.3;
+    building.add(parapet);
+
+    // 3. Marquesina Curva Abovedada de Acceso (Canopy de las fotos)
+    const canopyW = 28;
+    const canopyD = 6.0;
+
+    // Bóveda semicilíndrica translúcida
+    const canopyGeo = new THREE.CylinderGeometry(canopyD / 1.1, canopyD / 1.1, canopyW, 16, 1, false, 0, Math.PI);
+    canopyGeo.rotateZ(Math.PI / 2);
+    const canopyMesh = new THREE.Mesh(canopyGeo, canopyGlassMat);
+    canopyMesh.position.set(0, groundH + 0.8, mainD / 2 + canopyD / 2 - 0.5);
+    canopyMesh.scale.set(1, 0.35, 1);
+    building.add(canopyMesh);
+
+    // Pilares metálicos plateados de la marquesina
+    [-12, -4, 4, 12].forEach((px) => {
+      const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, groundH + 0.6, 8);
+      const pole = new THREE.Mesh(poleGeo, canopyArchMat);
+      pole.position.set(px, (groundH + 0.6) / 2, mainD / 2 + canopyD - 0.8);
+      pole.castShadow = true;
+      building.add(pole);
+    });
+
+    // Puerta de acceso vidriada
+    const doorGeo = new THREE.BoxGeometry(5.0, 2.6, 1.2);
+    const door = new THREE.Mesh(doorGeo, glassMat);
+    door.position.set(0, 1.3, mainD / 2 + 0.6);
+    building.add(door);
+
+    // Letrero Frontal: HOSPITAL DE PUERTO AYSÉN
+    const signBoardGeo = new THREE.BoxGeometry(22, 0.9, 0.1);
+    const signBoard = new THREE.Mesh(signBoardGeo, hospitalLettersMat);
+    signBoard.position.set(0, groundH + 4.2, mainD / 2 + 0.1);
+    building.add(signBoard);
+
+    // 4. Ala de Urgencias y Ambulancias (Izquierda, gris grafito moderno)
+    const urgW = 20;
+    const urgH = 7.2;
+    const urgD = 18;
+    const urgGeo = new THREE.BoxGeometry(urgW, urgH, urgD);
+    const urgMesh = new THREE.Mesh(urgGeo, hospitalEmergencyMat);
+    urgMesh.position.set(-mainW / 2 - urgW / 2 + 2, urgH / 2, -1);
+    urgMesh.castShadow = true;
+    building.add(urgMesh);
+
+    // Bahía cubierta de ambulancias
+    const bayRoofGeo = new THREE.BoxGeometry(12, 0.5, 8);
+    const bayRoof = new THREE.Mesh(bayRoofGeo, hospitalEmergencyMat);
+    bayRoof.position.set(-mainW / 2 - 6, 4.2, urgD / 2 + 2);
+    building.add(bayRoof);
+
+    // Columnas de la bahía de ambulancias
+    [-mainW / 2 - 11, -mainW / 2 - 1].forEach((bx) => {
+      const colGeo = new THREE.CylinderGeometry(0.2, 0.2, 4.2, 8);
+      const col = new THREE.Mesh(colGeo, canopyArchMat);
+      col.position.set(bx, 2.1, urgD / 2 + 5.5);
+      building.add(col);
+    });
+
+    // Cruz roja luminosa de urgencias
+    const crossMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 1.5 });
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 0.1), crossMat);
+    crossH.position.set(-mainW / 2 - 6, 5.8, urgD / 2 + 0.1);
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.7, 2.4, 0.1), crossMat);
+    crossV.position.set(-mainW / 2 - 6, 5.8, urgD / 2 + 0.1);
+    building.add(crossH, crossV);
+
+    // 5. Ventanales corridos (Ribbon Windows en los 3 niveles)
+    for (let f = 0; f < 3; f++) {
+      const wy = 1.8 + f * 3.4;
+      for (let w = -6; w <= 6; w++) {
+        if (f === 0 && Math.abs(w) <= 1) continue; // Acceso principal
+        const wx = w * 3.8;
+        const winGeo = new THREE.BoxGeometry(2.8, 1.6, 0.1);
+        const win = new THREE.Mesh(winGeo, glassMat);
+        win.position.set(wx, wy, mainD / 2 + 0.06);
+        building.add(win);
+      }
+    }
+
+    return building;
+  }
+
   // Instanciar hitos patrimoniales
   landmarksGroup.add(buildOficinaTierras());
   landmarksGroup.add(buildMunicipalidad());
+  landmarksGroup.add(buildHospital());
 
   return landmarksGroup;
 }

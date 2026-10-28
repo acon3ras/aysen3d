@@ -13,8 +13,9 @@ import { createLandmarks } from './landmarks.js';
 import { setupPostProcessing } from './postprocessing.js';
 import { createWeatherEffects } from './weather-effects.js';
 import { createAudioManager } from './audio-manager.js';
+import { createVehicleController } from './vehicle-controller.js';
 
-// Configuración de escena
+// Configuración del motor y renderizador
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 9000);
@@ -54,10 +55,26 @@ scene.add(sunLight);
 const weatherEffects = createWeatherEffects(scene);
 const audioManager = createAudioManager();
 
+// Controlador del Vehículo (Drive Mode en 3ª Persona)
+const vehicle = createVehicleController(scene, camera);
+
 // Presets de Clima y Atmósfera Patagónica
 const weatherPresets = {
+  sol: {
+    name: 'Sol Andino',
+    icon: '☀️',
+    fogColor: 0xbae6fd,
+    fogDensity: 0.00045,
+    skyColor: 0x0284c7,
+    sunColor: 0xffedd5,
+    sunIntensity: 1.8,
+    sunPos: [300, 600, 200],
+    ambient: 0.65,
+    isRain: false
+  },
   niebla: {
     name: 'Niebla Patagónica',
+    icon: '🌫️',
     fogColor: 0x94a3b8,
     fogDensity: 0.0018,
     skyColor: 0x64748b,
@@ -69,6 +86,7 @@ const weatherPresets = {
   },
   lluvia: {
     name: 'Lluvia Patagónica',
+    icon: '🌧️',
     fogColor: 0x475569,
     fogDensity: 0.0024,
     skyColor: 0x334155,
@@ -78,19 +96,9 @@ const weatherPresets = {
     ambient: 0.65,
     isRain: true
   },
-  sol: {
-    name: 'Sol Andino',
-    fogColor: 0xbae6fd,
-    fogDensity: 0.00045,
-    skyColor: 0x0284c7,
-    sunColor: 0xffedd5,
-    sunIntensity: 1.8,
-    sunPos: [300, 600, 200],
-    ambient: 0.65,
-    isRain: false
-  },
   dorado: {
     name: 'Atardecer Dorado',
+    icon: '🌅',
     fogColor: 0xfdba74,
     fogDensity: 0.0008,
     skyColor: 0xc2410c,
@@ -102,6 +110,7 @@ const weatherPresets = {
   },
   noche: {
     name: 'Noche Austral',
+    icon: '🌙',
     fogColor: 0x090d16,
     fogDensity: 0.0014,
     skyColor: 0x020617,
@@ -113,7 +122,7 @@ const weatherPresets = {
   }
 };
 
-// Referencias globales a mallas con materiales dinámicos
+// Referencias a mallas con materiales dinámicos
 let roadsMesh = null;
 let buildingsMesh = null;
 
@@ -147,19 +156,14 @@ function applyWeather(presetKey) {
     });
   }
 
-  document.querySelectorAll('.weather-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.weather === presetKey);
-  });
-}
+  // Actualizar etiqueta del botón superior
+  const weatherIconEl = document.getElementById('weather-icon');
+  const weatherLabelEl = document.getElementById('weather-label');
+  if (weatherIconEl) weatherIconEl.textContent = p.icon;
+  if (weatherLabelEl) weatherLabelEl.textContent = p.name;
 
-// Botón de activación de Audio
-const audioBtn = document.getElementById('audio-toggle-btn');
-if (audioBtn) {
-  audioBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isPlaying = audioManager.toggle();
-    audioBtn.textContent = isPlaying ? '🔊 Audio' : '🔇 Audio';
-    audioBtn.classList.toggle('active', isPlaying);
+  document.querySelectorAll('#weather-dropdown-menu .menu-item').forEach((item) => {
+    item.classList.toggle('active', item.dataset.weather === presetKey);
   });
 }
 
@@ -180,7 +184,7 @@ scene.add(puenteMesh);
 buildingsMesh = createPatagonianBuildings(AYSEN_GEO);
 scene.add(buildingsMesh);
 
-// Aplicar preset inicial una vez creadas las mallas
+// Aplicar preset inicial
 applyWeather('sol');
 
 const foliageMesh = createPatagonianFoliage(AYSEN_GEO);
@@ -195,53 +199,88 @@ scene.add(streetDetailsMesh);
 const landmarksMesh = createLandmarks(AYSEN_GEO);
 scene.add(landmarksMesh);
 
-// Minimapa
+// Minimapa 2D
 const minimap = createMinimap('minimap-canvas', AYSEN_GEO);
 
-// Miradores peatonales y panorámicos calibrados
+// Miradores peatonales y vehiculares calibrados
 const SPAWN_PRESETS = {
-  puente: { pos: [0, 8.5, 45], lookAt: [0, 8.5, -80], label: 'Puente Presidente Ibáñez' },
-  plaza: { pos: [-1107, 2.4, 236], lookAt: [-1107, 2.5, 219], label: 'Plaza de Armas' },
-  muni: { pos: [-1113.7, 4.2, 218], lookAt: [-1113.7, 5.0, 187.1], label: 'Municipalidad de Aysén' },
-  costanera: { pos: [-480, 2.2, 122], lookAt: [-480, 2.0, 50], label: 'Costanera Río Aysén' },
-  comisaria: { pos: [-1005, 3.2, 172], lookAt: [-1005.4, 4.5, 149.4], label: '2ª Comisaría (Tierras y Colonización)' },
-  ribera_norte: { pos: [30, 8.5, -170], lookAt: [0, 7.5, 0], label: 'Ribera Norte' }
+  puente: { pos: [0, 7.8, 35], lookAt: [0, 8.0, 100], yaw: Math.PI, label: 'Puente Presidente Ibáñez' },
+  plaza: { pos: [-1107, 0.4, 236], lookAt: [-1107, 1.5, 219], yaw: 0, label: 'Plaza de Armas' },
+  muni: { pos: [-1113.7, 0.4, 216], lookAt: [-1113.7, 4.5, 187.1], yaw: 0, label: 'Ilustre Municipalidad' },
+  hospital: { pos: [15.0, 0.4, 480], lookAt: [15.0, 5.0, 444.5], yaw: 0, label: 'Hospital Dr. Jorge Ibar' },
+  comisaria: { pos: [-1005, 0.4, 172], lookAt: [-1005.4, 4.5, 149.4], yaw: 0, label: '2ª Comisaría (Tierras y Colonización)' },
+  costanera: { pos: [-480, 0.4, 122], lookAt: [-480, 2.0, 50], yaw: -Math.PI / 2, label: 'Costanera Río Aysén' },
+  ribera_norte: { pos: [30, 0.4, -170], lookAt: [0, 7.5, 0], yaw: 0, label: 'Ribera Norte' }
 };
 
-// Estado de la Cámara y Movimiento
-// Posición inicial: Sobre el Puente Presidente Ibáñez, mirando hacia la Ribera Sur y el Río
-camera.position.set(0, 8.5, 45);
-let targetLookAt = new THREE.Vector3(0, 8.5, -80);
-camera.lookAt(targetLookAt);
-
-let yaw = 0;
-let pitch = 0;
-const speed = 25; // m/s
-const runMultiplier = 2.8;
-
+// =========================================================================
+// SISTEMA DE MODOS DE JUEGO (1: Walk | 2: Drive | 3: Cycle | 4: Fly)
+// =========================================================================
+let currentMode = 'drive'; // Por defecto inicia en Conducción (como Slop New York)
 const keys = {};
-window.addEventListener('keydown', (e) => {
-  keys[e.code] = true;
-  if (e.code === 'KeyV') {
-    isFlyMode = !isFlyMode;
-    const modeLabel = document.getElementById('mode-indicator');
-    if (modeLabel) modeLabel.textContent = isFlyMode ? 'Drone / Vuelo' : 'Paseo Peatonal';
-  }
-});
-window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-let isFlyMode = true;
+const modeLabels = {
+  walk: 'PASEO PEATONAL',
+  drive: 'CAMIONETA PATAGÓNICA 4X4',
+  cycle: 'BICICLETA AUSTRAL',
+  fly: 'DRON / VUELO LIBRE'
+};
+
+const modeHints = {
+  walk: '<kbd>W</kbd><kbd>S</kbd> Caminar &nbsp;•&nbsp; <kbd>A</kbd><kbd>D</kbd> Girar &nbsp;•&nbsp; <kbd>Shift</kbd> Correr &nbsp;•&nbsp; Clic para Mirar',
+  drive: '<kbd>W</kbd><kbd>S</kbd> Acelerar / Reversa &nbsp;•&nbsp; <kbd>A</kbd><kbd>D</kbd> Girar &nbsp;•&nbsp; <kbd>Espacio</kbd> Freno &nbsp;•&nbsp; <kbd>B</kbd> Bocina',
+  cycle: '<kbd>W</kbd><kbd>S</kbd> Pedalear &nbsp;•&nbsp; <kbd>A</kbd><kbd>D</kbd> Manubrio &nbsp;•&nbsp; <kbd>Espacio</kbd> Freno',
+  fly: '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Desplazar &nbsp;•&nbsp; <kbd>Espacio</kbd>/<kbd>C</kbd> Subir/Bajar &nbsp;•&nbsp; <kbd>Shift</kbd> Turbo'
+};
+
+function setGameMode(mode) {
+  currentMode = mode;
+
+  // Actualizar botones de modo
+  document.querySelectorAll('#mode-selector-pill .mode-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+
+  // Actualizar etiqueta del vehículo / modo
+  const vehLabel = document.getElementById('vehicle-name-label');
+  if (vehLabel) vehLabel.textContent = modeLabels[mode] || 'SIMULADOR 3D';
+
+  // Actualizar hints
+  const hintEl = document.getElementById('hint-text');
+  if (hintEl) hintEl.innerHTML = modeHints[mode] || '';
+
+  // Activar o desactivar vehículo
+  const isVehicleMode = (mode === 'drive' || mode === 'cycle');
+  vehicle.setActive(isVehicleMode);
+
+  // Crosshair solo para caminata
+  const crosshair = document.getElementById('crosshair');
+  if (crosshair) crosshair.style.opacity = (mode === 'walk' && isPointerLocked) ? '1' : '0';
+}
+
+// Inicializar en Drive Mode
+setGameMode('drive');
+
+// =========================================================================
+// CÁMARA LIBRE / PEATONAL (Walk & Fly)
+// =========================================================================
+let yaw = Math.PI;
+let pitch = 0;
+const walkSpeed = 6.0; // m/s
+const runMultiplier = 2.4;
+const flySpeed = 30.0;
 let isPointerLocked = false;
 
-// Control por ratón (Pointer Lock)
 container.addEventListener('click', () => {
-  container.requestPointerLock();
+  if (currentMode === 'walk' || currentMode === 'fly') {
+    container.requestPointerLock();
+  }
 });
 
 document.addEventListener('pointerlockchange', () => {
   isPointerLocked = (document.pointerLockElement === container);
   const crosshair = document.getElementById('crosshair');
-  if (crosshair) crosshair.style.opacity = isPointerLocked ? '1' : '0.3';
+  if (crosshair) crosshair.style.opacity = (isPointerLocked && currentMode === 'walk') ? '1' : '0';
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -252,11 +291,15 @@ document.addEventListener('mousemove', (e) => {
   pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
 });
 
-// Teletransporte a Hitos
+// Teletransporte
 window.teleportTo = function(id) {
-  const spawn = SPAWN_PRESETS[id] || (AYSEN_GEO.spawnPoints && AYSEN_GEO.spawnPoints.find((s) => s.id === id));
-  if (spawn) {
-    camera.position.set(spawn.pos[0], spawn.pos[1], spawn.pos[2]);
+  const spawn = SPAWN_PRESETS[id];
+  if (!spawn) return;
+
+  if (currentMode === 'drive' || currentMode === 'cycle') {
+    vehicle.teleport(spawn.pos[0], spawn.pos[2], spawn.yaw !== undefined ? spawn.yaw : Math.PI);
+  } else {
+    camera.position.set(spawn.pos[0], spawn.pos[1] + 1.8, spawn.pos[2]);
     camera.up.set(0, 1, 0);
     if (spawn.lookAt) {
       const dx = spawn.lookAt[0] - spawn.pos[0];
@@ -269,28 +312,183 @@ window.teleportTo = function(id) {
   }
 };
 
-// Eventos de botones UI
-document.querySelectorAll('.weather-btn').forEach((btn) => {
+// =========================================================================
+// EVENTOS DE TECLADO Y ATAJOS (1, 2, 3, 4, M, V, B)
+// =========================================================================
+window.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+
+  // Atajos de modos de juego
+  if (e.code === 'Digit1') setGameMode('walk');
+  if (e.code === 'Digit2') setGameMode('drive');
+  if (e.code === 'Digit3') setGameMode('cycle');
+  if (e.code === 'Digit4') setGameMode('fly');
+
+  // Alternar minimapa
+  if (e.code === 'KeyM') toggleMinimap();
+
+  // Cambiar modo con V
+  if (e.code === 'KeyV') {
+    const nextModes = { drive: 'walk', walk: 'fly', fly: 'cycle', cycle: 'drive' };
+    setGameMode(nextModes[currentMode] || 'drive');
+  }
+
+  // Bocina con B
+  if (e.code === 'KeyB') {
+    console.log('[Vehicle] Beep! Bocina patagónica activada.');
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  keys[e.code] = false;
+});
+
+// Botones de Selector de Modo (HUD Inferior)
+document.querySelectorAll('#mode-selector-pill .mode-btn').forEach((btn) => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    applyWeather(btn.dataset.weather);
+    setGameMode(btn.dataset.mode);
   });
 });
 
-document.querySelectorAll('.teleport-btn').forEach((btn) => {
-  btn.addEventListener('click', (e) => {
+// Botón de cámara (V)
+const camToggleBtn = document.getElementById('cam-toggle-btn');
+if (camToggleBtn) {
+  camToggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    window.teleportTo(btn.dataset.spawn);
+    const nextModes = { drive: 'walk', walk: 'fly', fly: 'cycle', cycle: 'drive' };
+    setGameMode(nextModes[currentMode] || 'drive');
+  });
+}
+
+// =========================================================================
+// DROPDOWNS DE LA BARRA SUPERIOR (Clima y Teleport)
+// =========================================================================
+const weatherDropdownBtn = document.getElementById('weather-dropdown-btn');
+const weatherMenu = document.getElementById('weather-dropdown-menu');
+
+const teleportDropdownBtn = document.getElementById('teleport-dropdown-btn');
+const teleportMenu = document.getElementById('teleport-dropdown-menu');
+
+// Alternar dropdown de Clima
+if (weatherDropdownBtn && weatherMenu) {
+  weatherDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    weatherMenu.classList.toggle('hidden');
+    if (teleportMenu) teleportMenu.classList.add('hidden');
+  });
+}
+
+// Alternar dropdown de Teleport
+if (teleportDropdownBtn && teleportMenu) {
+  teleportDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    teleportMenu.classList.toggle('hidden');
+    if (weatherMenu) weatherMenu.classList.add('hidden');
+  });
+}
+
+// Cerrar menús al hacer clic afuera
+document.addEventListener('click', () => {
+  if (weatherMenu) weatherMenu.classList.add('hidden');
+  if (teleportMenu) teleportMenu.classList.add('hidden');
+});
+
+// Acciones de Clima
+document.querySelectorAll('#weather-dropdown-menu .menu-item').forEach((item) => {
+  item.addEventListener('click', (e) => {
+    e.stopPropagation();
+    applyWeather(item.dataset.weather);
+    if (weatherMenu) weatherMenu.classList.add('hidden');
   });
 });
 
-// HUD & Medidor de Rendimiento
-const coordsEl = document.getElementById('coords-display');
+// Acciones de Teleport
+document.querySelectorAll('#teleport-dropdown-menu .menu-item').forEach((item) => {
+  item.addEventListener('click', (e) => {
+    e.stopPropagation();
+    window.teleportTo(item.dataset.spawn);
+    if (teleportMenu) teleportMenu.classList.add('hidden');
+  });
+});
+
+// Botón Minimapa
+const minimapToggleBtn = document.getElementById('minimap-toggle-btn');
+const minimapContainer = document.getElementById('minimap-container');
+let minimapVisible = true;
+
+function toggleMinimap() {
+  minimapVisible = !minimapVisible;
+  if (minimapContainer) minimapContainer.classList.toggle('hidden', !minimapVisible);
+  if (minimapToggleBtn) minimapToggleBtn.classList.toggle('active', minimapVisible);
+}
+
+if (minimapToggleBtn) {
+  minimapToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMinimap();
+  });
+}
+
+// Botón de Audio
+const audioToggleBtn = document.getElementById('audio-toggle-btn');
+if (audioToggleBtn) {
+  audioToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isPlaying = audioManager.toggle();
+    audioToggleBtn.textContent = isPlaying ? '🔊 Audio' : '🔇 Audio';
+    audioToggleBtn.classList.toggle('active', isPlaying);
+  });
+}
+
+// =========================================================================
+// DETECCIÓN DINÁMICA DE CALLES CHILENAS (Placas Verdes)
+// =========================================================================
+const currentStreetPlate = document.getElementById('current-street-plate');
+const crossStreetPlate = document.getElementById('cross-street-plate');
+let lastStreetCheck = 0;
+
+function updateStreetNames(playerX, playerZ) {
+  const roads = AYSEN_GEO.roads || [];
+  let closestDist = Infinity;
+  let closestName = 'SARGENTO ALDEA';
+  let secondClosestName = 'ESMERALDA';
+
+  for (let i = 0; i < roads.length; i++) {
+    const road = roads[i];
+    if (!road.name || road.name.length < 3) continue;
+
+    const pts = road.pts;
+    for (let p = 0; p < pts.length; p += 2) {
+      const dist = Math.hypot(pts[p] - playerX, pts[p + 1] - playerZ);
+      if (dist < closestDist) {
+        if (road.name.toUpperCase() !== closestName) {
+          secondClosestName = closestName;
+        }
+        closestDist = dist;
+        closestName = road.name.toUpperCase();
+      }
+    }
+  }
+
+  if (currentStreetPlate && closestDist < 120) {
+    currentStreetPlate.textContent = closestName;
+    if (crossStreetPlate) {
+      crossStreetPlate.textContent = secondClosestName !== closestName ? secondClosestName : 'P. AYSÉN';
+    }
+  }
+}
+
+// =========================================================================
+// BUCLE PRINCIPAL DE ANIMACIÓN Y TELEMETRÍA
+// =========================================================================
+const speedNumEl = document.getElementById('speed-display-number');
+const speedGaugeFill = document.getElementById('speed-gauge-fill');
 const fpsEl = document.getElementById('fps-display');
 let frameCount = 0;
 let lastFpsTime = performance.now();
 
-// Ocultar pantalla de carga una vez inicializada la escena
+// Ocultar pantalla de carga
 setTimeout(() => {
   const loader = document.getElementById('loader-overlay');
   if (loader) {
@@ -299,7 +497,6 @@ setTimeout(() => {
   }
 }, 600);
 
-// Bucle de Animación
 const clock = new THREE.Clock();
 
 function animate() {
@@ -308,72 +505,93 @@ function animate() {
   const delta = Math.min(clock.getDelta(), 0.1);
   const time = clock.getElapsedTime();
 
-  // Actualizar rotación de cámara con vector UP constante
-  camera.up.set(0, 1, 0);
-  const cosP = Math.cos(pitch);
-  const forward = new THREE.Vector3(-Math.sin(yaw) * cosP, Math.sin(pitch), -Math.cos(yaw) * cosP).normalize();
-  const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
-  const up = new THREE.Vector3(0, 1, 0);
+  let playerX = 0;
+  let playerZ = 0;
+  let playerYaw = 0;
 
-  // Movimiento
-  const currentSpeed = (keys['ShiftLeft'] || keys['ShiftRight'] ? speed * runMultiplier : speed) * delta;
-  const moveDir = new THREE.Vector3();
+  // 1. Lógica según el modo activo
+  if (currentMode === 'drive' || currentMode === 'cycle') {
+    vehicle.update(delta, keys);
 
-  if (keys['KeyW'] || keys['ArrowUp']) moveDir.add(isFlyMode ? forward : new THREE.Vector3(forward.x, 0, forward.z).normalize());
-  if (keys['KeyS'] || keys['ArrowDown']) moveDir.sub(isFlyMode ? forward : new THREE.Vector3(forward.x, 0, forward.z).normalize());
-  if (keys['KeyD'] || keys['ArrowRight']) moveDir.add(right);
-  if (keys['KeyA'] || keys['ArrowLeft']) moveDir.sub(right);
-  if (isFlyMode) {
-    if (keys['Space']) moveDir.add(up);
-    if (keys['KeyC']) moveDir.sub(up);
-  }
+    const carPos = vehicle.getPosition();
+    playerX = carPos.x;
+    playerZ = carPos.z;
+    playerYaw = vehicle.getYaw();
 
-  if (moveDir.lengthSq() > 0) {
-    moveDir.normalize();
-    camera.position.addScaledVector(moveDir, currentSpeed);
-  }
-
-  // Límite de altura mínimo sobre el suelo en modo peatón
-  if (!isFlyMode) {
-    // Si estamos sobre el puente (X entre -6 y +6, Z entre -105 y 105), la altura es deckY (6m) + 1.8m
-    const onBridge = Math.abs(camera.position.x) < 5.5 && Math.abs(camera.position.z) < 105;
-    const groundMinY = onBridge ? 7.8 : 2.0;
-    camera.position.y = Math.max(camera.position.y, groundMinY);
+    // Actualizar velocímetro en KM/H
+    const kmh = vehicle.getSpeedKmh();
+    if (speedNumEl) speedNumEl.textContent = String(kmh);
+    if (speedGaugeFill) speedGaugeFill.style.width = (vehicle.getSpeedFraction() * 100) + '%';
   } else {
-    camera.position.y = Math.max(camera.position.y, 2.0);
+    // Modo Caminata o Dron (Vuelo libre)
+    camera.up.set(0, 1, 0);
+    const cosP = Math.cos(pitch);
+    const forward = new THREE.Vector3(-Math.sin(yaw) * cosP, Math.sin(pitch), -Math.cos(yaw) * cosP).normalize();
+    const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
+    const up = new THREE.Vector3(0, 1, 0);
+
+    const moveSpeed = (currentMode === 'fly' ? flySpeed : walkSpeed) * (keys['ShiftLeft'] || keys['ShiftRight'] ? runMultiplier : 1.0) * delta;
+    const moveDir = new THREE.Vector3();
+
+    if (keys['KeyW'] || keys['ArrowUp']) moveDir.add(currentMode === 'fly' ? forward : new THREE.Vector3(forward.x, 0, forward.z).normalize());
+    if (keys['KeyS'] || keys['ArrowDown']) moveDir.sub(currentMode === 'fly' ? forward : new THREE.Vector3(forward.x, 0, forward.z).normalize());
+    if (keys['KeyD'] || keys['ArrowRight']) moveDir.add(right);
+    if (keys['KeyA'] || keys['ArrowLeft']) moveDir.sub(right);
+    if (currentMode === 'fly') {
+      if (keys['Space']) moveDir.add(up);
+      if (keys['KeyC']) moveDir.sub(up);
+    }
+
+    if (moveDir.lengthSq() > 0) {
+      moveDir.normalize();
+      camera.position.addScaledVector(moveDir, moveSpeed);
+    }
+
+    if (currentMode === 'walk') {
+      const onBridge = Math.abs(camera.position.x) < 5.5 && Math.abs(camera.position.z) < 115;
+      camera.position.y = onBridge ? 7.8 : 2.0;
+    } else {
+      camera.position.y = Math.max(camera.position.y, 2.0);
+    }
+
+    camera.lookAt(camera.position.clone().add(forward));
+
+    playerX = camera.position.x;
+    playerZ = camera.position.z;
+    playerYaw = yaw;
+
+    // Velocímetro peatonal / vuelo
+    const simSpeed = moveDir.lengthSq() > 0 ? (currentMode === 'fly' ? 55 : 5) : 0;
+    if (speedNumEl) speedNumEl.textContent = String(simSpeed);
+    if (speedGaugeFill) speedGaugeFill.style.width = (simSpeed / 60 * 100) + '%';
   }
 
-  camera.lookAt(camera.position.clone().add(forward));
+  // 2. Actualizar nombre de calles cada 0.6s
+  if (time - lastStreetCheck > 0.6) {
+    updateStreetNames(playerX, playerZ);
+    lastStreetCheck = time;
+  }
 
-  // Actualizar agua del río
+  // 3. Sistemas ambientales
   riverSystem.update(time);
-
-  // Actualizar efectos de clima (lluvia patagónica centrada en la cámara)
   weatherEffects.update(delta, camera.position);
-
-  // Actualizar audio ambiental posicional (volumen del río según proximidad)
   audioManager.updatePosition(camera.position);
 
-  // Actualizar minimapa
-  if (minimap) {
-    minimap.draw(camera.position.x, camera.position.z, yaw);
+  // 4. Minimapa
+  if (minimap && minimapVisible) {
+    minimap.draw(playerX, playerZ, playerYaw);
   }
 
-  // HUD
-  if (coordsEl) {
-    coordsEl.textContent = `X: ${Math.round(camera.position.x)} m | Z: ${Math.round(camera.position.z)} m | Y: ${Math.round(camera.position.y)} m`;
-  }
-
-  // FPS
+  // 5. FPS Counter
   frameCount++;
   const now = performance.now();
   if (now - lastFpsTime >= 1000) {
-    if (fpsEl) fpsEl.textContent = `${frameCount} FPS`;
+    if (fpsEl) fpsEl.textContent = String(frameCount);
     frameCount = 0;
     lastFpsTime = now;
   }
 
-  // Renderizado a través del pipeline cinematográfico de Post-Procesado (o fallback a renderer)
+  // 6. Post-Procesado Cinematográfico
   if (postProcessing && postProcessing.render) {
     postProcessing.render();
   } else {

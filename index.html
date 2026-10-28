@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Slop Puerto Aysén — Patagonia 3D (v0.1 MVP)</title>
+  <title>Slop Puerto Aysén — Patagonia 3D</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌉</text></svg>" />
-  <meta name="description" content="Simulación 3D interactiva de Puerto Aysén, Patagonia Chilena, construida con Three.js a partir de datos reales de OpenStreetMap, relieve andino y el Puente Presidente Ibáñez." />
+  <meta name="description" content="Simulación 3D interactiva de Puerto Aysén, Patagonia Chilena, inspirada en Slop New York con datos reales de OpenStreetMap, relieve andino y el Puente Presidente Ibáñez." />
 
   <!-- Tipografía Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Estilos UI -->
+  <!-- Estilos UI 1:1 Slop New York -->
   <link rel="stylesheet" href="./css/style.css" />
 
   <!-- Importmap para Three.js -->
@@ -37,65 +37,111 @@
   <div id="loader-overlay">
     <div class="loader-spinner"></div>
     <div class="loader-title">Slop Puerto Aysén 3D</div>
-    <div class="loader-msg">Cargando 817 calles, 2.800 casas patagónicas y el Río Aysén...</div>
+    <div class="loader-msg">Cargando 817 calles reales, 2.800 casas patagónicas y el Río Aysén...</div>
   </div>
 
-  <!-- HUD Superior Izquierdo: Información y Estado -->
-  <div id="top-left-panel" class="hud-panel">
-    <div class="title-container">
-      <span class="bridge-badge">Patagonia 3D</span>
-      <h1>Puerto Aysén</h1>
-    </div>
-    <div class="subtitle">
-      <span>📍 45°24′ S, 72°41′ O</span>
-      <span>•</span>
-      <span id="mode-indicator">Drone / Vuelo</span>
-    </div>
-    <div class="stats-row">
-      <div class="stat-item"><span id="fps-display">60 FPS</span></div>
-      <div class="stat-item"><span id="coords-display">X: 0 m | Z: 0 m</span></div>
+  <!-- =========================================================================
+       CUADRANTE 1 (TOP-LEFT): Marca y Telemetría del Motor
+       ========================================================================= -->
+  <div id="slop-brand">
+    <div class="brand-badge">AY</div>
+    <div class="brand-text">
+      <div class="brand-title">Slop Puerto Aysén <a href="https://github.com/acon3ras/aysen3d" target="_blank" class="github-link">GitHub ↗</a></div>
+      <div class="brand-subtitle">three.js · WebGL2 · <span id="fps-display">60</span> fps</div>
     </div>
   </div>
 
-  <!-- HUD Superior Derecho: Atmósfera y Clima Patagónico -->
-  <div id="top-right-panel" class="hud-panel">
-    <span class="section-label">Atmósfera y Clima</span>
-    <div class="button-group">
-      <button class="weather-btn active" data-weather="sol">☀️ Sol</button>
-      <button class="weather-btn" data-weather="niebla">🌫️ Niebla</button>
-      <button class="weather-btn" data-weather="lluvia">🌧️ Lluvia</button>
-      <button class="weather-btn" data-weather="dorado">🌅 Atardecer</button>
-      <button class="weather-btn" data-weather="noche">🌙 Noche</button>
-      <button id="audio-toggle-btn" class="weather-btn">🔇 Audio</button>
+  <!-- =========================================================================
+       CUADRANTE 2 (TOP-RIGHT): Píldora de Acciones y Clima
+       ========================================================================= -->
+  <div id="slop-top-pill">
+    <!-- Selector de Clima / Atmósfera -->
+    <div class="pill-dropdown-wrapper">
+      <button id="weather-dropdown-btn" class="pill-btn">
+        <span id="weather-icon">☀️</span> <span id="weather-label">Sol Andino</span> ▾
+      </button>
+      <div id="weather-dropdown-menu" class="pill-menu hidden">
+        <button class="menu-item active" data-weather="sol">☀️ Sol Andino</button>
+        <button class="menu-item" data-weather="niebla">🌫️ Niebla Patagónica</button>
+        <button class="menu-item" data-weather="lluvia">🌧️ Lluvia Patagónica</button>
+        <button class="menu-item" data-weather="dorado">🌅 Atardecer Dorado</button>
+        <button class="menu-item" data-weather="noche">🌙 Noche Austral</button>
+      </div>
+    </div>
+
+    <div class="pill-divider"></div>
+
+    <!-- Menú de Teletransporte a Hitos -->
+    <div class="pill-dropdown-wrapper">
+      <button id="teleport-dropdown-btn" class="pill-btn">📍 Teleport ▾</button>
+      <div id="teleport-dropdown-menu" class="pill-menu hidden">
+        <button class="menu-item" data-spawn="puente">🌉 Puente Presidente Ibáñez</button>
+        <button class="menu-item" data-spawn="plaza">🌳 Plaza de Armas</button>
+        <button class="menu-item" data-spawn="muni">🏛️ Ilustre Municipalidad</button>
+        <button class="menu-item" data-spawn="hospital">🏥 Hospital Dr. Jorge Ibar</button>
+        <button class="menu-item" data-spawn="comisaria">🏛️ 2ª Comisaría (1932)</button>
+        <button class="menu-item" data-spawn="costanera">🌊 Costanera Río Aysén</button>
+        <button class="menu-item" data-spawn="ribera_norte">🌲 Ribera Norte</button>
+      </div>
+    </div>
+
+    <div class="pill-divider"></div>
+
+    <button id="minimap-toggle-btn" class="pill-btn">🗺️ Map <span class="key-shortcut">M</span></button>
+    
+    <div class="pill-divider"></div>
+    
+    <button id="audio-toggle-btn" class="pill-btn">🔇 Audio</button>
+  </div>
+
+  <!-- =========================================================================
+       CUADRANTE 3 (BOTTOM-LEFT): Placas de Calles Chilenas y Minimapa
+       ========================================================================= -->
+  <div id="bottom-left-container">
+    <div id="street-signs-wrapper">
+      <div class="street-plate" id="current-street-plate">SARGENTO ALDEA</div>
+      <div class="street-plate secondary" id="cross-street-plate">ESMERALDA</div>
+    </div>
+    <div id="minimap-container">
+      <div class="minimap-north">N ↑</div>
+      <canvas id="minimap-canvas"></canvas>
     </div>
   </div>
 
-  <!-- HUD Inferior Izquierdo: Teletransporte a Hitos -->
-  <div id="teleport-panel" class="hud-panel">
-    <span class="section-label">Hitos de Puerto Aysén</span>
-    <div class="teleport-list">
-      <button class="teleport-btn" data-spawn="puente">🌉 Puente Ibáñez</button>
-      <button class="teleport-btn" data-spawn="plaza">🌳 Plaza de Armas</button>
-      <button class="teleport-btn" data-spawn="muni">🏛️ Municipalidad</button>
-      <button class="teleport-btn" data-spawn="comisaria">🏛️ 2ª Comisaría (1932)</button>
-      <button class="teleport-btn" data-spawn="costanera">🌊 Costanera Río Aysén</button>
-      <button class="teleport-btn" data-spawn="ribera_norte">🌲 Ribera Norte</button>
+  <!-- =========================================================================
+       CUADRANTE 4 (BOTTOM-CENTER): Selector de Modos y Controles
+       ========================================================================= -->
+  <div id="bottom-center-container">
+    <div id="control-hints-pill" class="hint-pill">
+      <span id="hint-text"><kbd>W</kbd><kbd>S</kbd> Acelerar / Reversa &nbsp;•&nbsp; <kbd>A</kbd><kbd>D</kbd> Girar &nbsp;•&nbsp; <kbd>Espacio</kbd> Freno &nbsp;•&nbsp; <kbd>B</kbd> Bocina &nbsp;•&nbsp; Arrastrar Orbitar</span>
+    </div>
+    <div id="mode-selector-pill">
+      <button class="mode-btn" data-mode="walk">🚶 Walk <span class="key-shortcut">1</span></button>
+      <button class="mode-btn active" data-mode="drive">🚗 Drive <span class="key-shortcut">2</span></button>
+      <button class="mode-btn" data-mode="cycle">🚲 Cycle <span class="key-shortcut">3</span></button>
+      <button class="mode-btn" data-mode="fly">🛸 Fly <span class="key-shortcut">4</span></button>
     </div>
   </div>
 
-  <!-- HUD Inferior Central: Controles -->
-  <div id="controls-hint" class="hud-panel">
-    <div><span class="key-tag">Clic</span> Mirar (Ratón)</div>
-    <div><span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> Mover</div>
-    <div><span class="key-tag">Shift</span> Acelerar</div>
-    <div><span class="key-tag">Espacio</span>/<span class="key-tag">C</span> Subir/Bajar</div>
-    <div><span class="key-tag">V</span> Cambiar Modo</div>
-  </div>
-
-  <!-- HUD Inferior Derecho: Minimapa -->
-  <div id="minimap-panel" class="hud-panel">
-    <span class="compass-label">Norte ↑</span>
-    <canvas id="minimap-canvas"></canvas>
+  <!-- =========================================================================
+       CUADRANTE 5 (BOTTOM-RIGHT): Dashboard de Telemetría del Vehículo
+       ========================================================================= -->
+  <div id="bottom-right-container">
+    <div id="telemetry-card">
+      <div class="telemetry-header">
+        <span id="vehicle-name-label">CAMIONETA PATAGÓNICA 4X4</span>
+      </div>
+      <div class="speedometer-row">
+        <span id="speed-display-number">0</span>
+        <span class="speed-unit">KM/H</span>
+      </div>
+      <div class="speed-gauge-track">
+        <div id="speed-gauge-fill"></div>
+      </div>
+      <div class="camera-mode-row">
+        <button id="cam-toggle-btn" class="cam-toggle-btn">‹ 3rd-Person Chase <kbd>V</kbd> ›</button>
+      </div>
+    </div>
   </div>
 
   <!-- Script Principal de la Aplicación -->

@@ -72,6 +72,56 @@ export function createRoadNetwork(geoData) {
     const roadMesh = new THREE.Mesh(geom, asphaltMat);
     roadMesh.receiveShadow = true;
     roadGroup.add(roadMesh);
+
+    // Pintura vial discontinua (línea blanca central) en avenidas principales
+    if ((road.w && road.w >= 7.5) || (road.name && (road.name.includes('Aldea') || road.name.includes('Ibar') || road.name.includes('O\'Higgins')))) {
+      const stripeGeom = new THREE.BufferGeometry();
+      const sVerts = [];
+      const sIndices = [];
+      const stripeW = 0.16;
+      let sIdx = 0;
+
+      for (let i = 0; i < numPts - 1; i++) {
+        const x1 = pts[i * 2], z1 = pts[i * 2 + 1];
+        const x2 = pts[(i + 1) * 2], z2 = pts[(i + 1) * 2 + 1];
+        const segLen = Math.hypot(x2 - x1, z2 - z1);
+        if (segLen < 2) continue;
+
+        const dirX = (x2 - x1) / segLen;
+        const dirZ = (z2 - z1) / segLen;
+        const normX = -dirZ;
+        const normZ = dirX;
+
+        const dashL = 3.5;
+        const gapL = 3.5;
+        let d = 0;
+        while (d + dashL <= segLen) {
+          const sx1 = x1 + dirX * d;
+          const sz1 = z1 + dirZ * d;
+          const sx2 = x1 + dirX * (d + dashL);
+          const sz2 = z1 + dirZ * (d + dashL);
+
+          const yStripe = 0.16; // Apenas sobre el asfalto (0.15)
+          sVerts.push(
+            sx1 - normX * stripeW, yStripe, sz1 - normZ * stripeW,
+            sx1 + normX * stripeW, yStripe, sz1 + normZ * stripeW,
+            sx2 - normX * stripeW, yStripe, sz2 - normZ * stripeW,
+            sx2 + normX * stripeW, yStripe, sz2 + normZ * stripeW
+          );
+
+          sIndices.push(sIdx, sIdx + 1, sIdx + 2, sIdx + 1, sIdx + 3, sIdx + 2);
+          sIdx += 4;
+          d += dashL + gapL;
+        }
+      }
+
+      if (sVerts.length > 0) {
+        stripeGeom.setAttribute('position', new THREE.Float32BufferAttribute(sVerts, 3));
+        stripeGeom.setIndex(sIndices);
+        const stripeMesh = new THREE.Mesh(stripeGeom, new THREE.MeshBasicMaterial({ color: 0xf1f5f9 }));
+        roadGroup.add(stripeMesh);
+      }
+    }
   });
 
   // 2. PARQUES Y PLAZAS (PLAZA DE ARMAS, ETC.)

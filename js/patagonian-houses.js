@@ -63,7 +63,9 @@ export function createPatagonianBuildings(geoData) {
   // Edificios que cuentan con modelado Nivel 3 detallado en landmarks.js
   const EXCLUDED_LANDMARK_IDS = new Set([
     836943359, // Oficina de Tierras y Colonización (2ª Comisaría)
-    434686872  // Ilustre Municipalidad de Aysén
+    434686872, // Ilustre Municipalidad de Aysén
+    625135601, // Hospital Dr. Jorge Ibar de Puerto Aysén (Edificio Principal)
+    364383065  // Hospital Dr. Jorge Ibar (Ala de Urgencias / Servicios)
   ]);
 
   buildings.forEach((b) => {
