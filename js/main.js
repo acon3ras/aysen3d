@@ -9,7 +9,7 @@ import { createRoadNetwork } from './road-network.js';
 import { createPatagonianTerrain } from './terrain.js';
 import { createMinimap } from './minimap.js';
 import { createStreetDetails } from './street-details.js';
-import { createLandmarks } from './landmarks.js?v=hospital-dwg-final';
+import { createLandmarks } from './landmarks.js?v=hospital-master-restored';
 import { setupPostProcessing } from './postprocessing.js';
 import { createWeatherEffects } from './weather-effects.js';
 import { createAudioManager } from './audio-manager.js';
@@ -207,13 +207,13 @@ const SPAWN_PRESETS = {
   puente: { pos: [0, 7.8, 35], lookAt: [0, 8.0, 100], yaw: Math.PI, label: 'Puente Presidente Ibáñez' },
   plaza: { pos: [-1107, 0.4, 236], lookAt: [-1107, 1.5, 219], yaw: 0, label: 'Plaza de Armas' },
   muni: { pos: [-1113.7, 0.4, 216], lookAt: [-1113.7, 4.5, 187.1], yaw: 0, label: 'Ilustre Municipalidad' },
-  hospital: { pos: [65.0, 36.0, 375.0], lookAt: [65.0, 6.0, 445.0], yaw: 0, label: 'Hospital de Puerto Aysén (Vista Panorámica)' },
-  hospital_frontis: { pos: [19.0, 0.4, 412.0], lookAt: [19.0, 2.5, 424.0], yaw: 0, label: 'Hospital: Frontis y Acceso Principal' },
-  hospital_sub: { pos: [40.0, -3.4, 442.0], lookAt: [20.0, -1.6, 442.0], yaw: Math.PI / 2, label: 'Hospital: Piso Subterráneo (-1) · Calderas · Gases' },
-  hospital_piso1: { pos: [31.0, 0.0, 434.0], lookAt: [55.0, 1.8, 434.0], yaw: -Math.PI / 2, label: 'Hospital: Piso 1 (SOME · Rayos X · Urgencias SAMU)' },
-  hospital_piso2: { pos: [33.0, 3.6, 440.0], lookAt: [55.0, 5.4, 440.0], yaw: -Math.PI / 2, label: 'Hospital: Piso 2 (Consultas · Dental · Kinesiología)' },
-  hospital_piso3: { pos: [35.0, 7.2, 440.0], lookAt: [60.0, 9.0, 440.0], yaw: -Math.PI / 2, label: 'Hospital: Piso 3 (Hospitalización · UTI · Neonatología)' },
-  hospital_interior: { pos: [31.0, 0.0, 434.0], lookAt: [55.0, 1.8, 434.0], yaw: -Math.PI / 2, label: 'Interior Hospital (SOME / Espera)' },
+  hospital: { pos: [15.0, 28.0, 345.0], lookAt: [15.0, 6.0, 430.0], yaw: 0, label: 'Hospital de Puerto Aysén (Vista Panorámica)' },
+  hospital_frontis: { pos: [15.0, 0.4, 396.0], lookAt: [15.0, 2.5, 420.0], yaw: 0, label: 'Hospital: Frontis y Acceso Principal' },
+  hospital_sub: { pos: [15.0, -1.6, 430.0], lookAt: [-5.0, -1.6, 434.0], yaw: Math.PI / 2, label: 'Hospital: Piso Subterráneo (-1) · Calderas · Gases' },
+  hospital_piso1: { pos: [15.0, 1.8, 425.0], lookAt: [22.5, 1.8, 425.5], yaw: -Math.PI / 2, label: 'Hospital: Piso 1 (SOME · Rayos X · Urgencias SAMU)' },
+  hospital_piso2: { pos: [15.0, 5.4, 430.0], lookAt: [-10.0, 5.4, 430.0], yaw: -Math.PI / 2, label: 'Hospital: Piso 2 (Consultas · Dental · Kinesiología)' },
+  hospital_piso3: { pos: [15.0, 9.0, 430.0], lookAt: [-10.0, 9.0, 430.0], yaw: -Math.PI / 2, label: 'Hospital: Piso 3 (Hospitalización · UTI · Neonatología)' },
+  hospital_interior: { pos: [15.0, 1.8, 425.0], lookAt: [22.5, 1.8, 425.5], yaw: -Math.PI / 2, label: 'Interior Hospital (SOME / Espera)' },
   comisaria: { pos: [-1005, 0.4, 172], lookAt: [-1005.4, 4.5, 149.4], yaw: 0, label: '2ª Comisaría (Tierras y Colonización)' },
   costanera: { pos: [-480, 0.4, 122], lookAt: [-480, 2.0, 50], yaw: -Math.PI / 2, label: 'Costanera Río Aysén' },
   ribera_norte: { pos: [30, 0.4, -170], lookAt: [0, 7.5, 0], yaw: 0, label: 'Ribera Norte' }
@@ -517,6 +517,9 @@ setTimeout(() => {
   }
 }, 600);
 
+const walkRaycaster = new THREE.Raycaster();
+walkRaycaster.far = 4.0;
+
 const clock = new THREE.Clock();
 
 function animate() {
@@ -564,12 +567,25 @@ function animate() {
 
     if (moveDir.lengthSq() > 0) {
       moveDir.normalize();
-      camera.position.addScaledVector(moveDir, moveSpeed);
+
+      let canMove = true;
+      if (currentMode === 'walk' && window.HOSPITAL_COLLIDERS && window.HOSPITAL_COLLIDERS.length > 0) {
+        // Raycast horizontal a la altura del personaje para evitar atravesar muros
+        walkRaycaster.set(camera.position, moveDir);
+        const hits = walkRaycaster.intersectObjects(window.HOSPITAL_COLLIDERS, false);
+        if (hits.length > 0 && hits[0].distance < Math.max(moveSpeed + 0.35, 0.45)) {
+          canMove = false;
+        }
+      }
+
+      if (canMove) {
+        camera.position.addScaledVector(moveDir, moveSpeed);
+      }
     }
 
     if (currentMode === 'walk') {
       const onBridge = Math.abs(camera.position.x) < 5.5 && Math.abs(camera.position.z) < 115;
-      const inHospital = (camera.position.x >= 10.0 && camera.position.x <= 120.0 && camera.position.z >= 420.0 && camera.position.z <= 476.0);
+      const inHospital = (camera.position.x >= -45.0 && camera.position.x <= 55.0 && camera.position.z >= 415.0 && camera.position.z <= 445.0);
 
       if (onBridge) {
         camera.position.y = 7.8;
